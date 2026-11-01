@@ -20,3 +20,10 @@ Keep all API keys in Worker secrets, never client code. Add authenticated `/api/
 
 ## Development
 Static build: no dependencies required. Serve the repository root over HTTPS (or localhost) for mic and service worker support. Files at root also work with GitHub Pages branch deployment. `node tests/engine.test.cjs` verifies core scheduling and duplicate behavior.
+
+## Cloudflare deployment foundation
+Import this repository as a Cloudflare Worker named `nudge-api`, root `/`, no build command, deploy command `npx wrangler deploy`. `wrangler.jsonc` selects `worker.mjs`; the frontend continues to be hosted by GitHub Pages. Pushes to the connected branch can deploy the Worker automatically.
+
+Visit `/health` to verify the service. This foundation does not call OpenAI, expose secrets, store reminders or provide authentication. A successful health check confirms deployment only. Add `OPENAI_API_KEY` as a Cloudflare runtime Secret when ready; `ALLOWED_ORIGIN` may be set to `https://nikki0radz.github.io` (the default). AI endpoints and app integration come next, with authentication before enabling billable operations. CORS is not authentication.
+
+Run `node tests/worker.test.mjs` for Worker checks, alongside the engine tests.

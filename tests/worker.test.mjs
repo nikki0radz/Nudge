@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import worker from '../worker.mjs';
+const run=(path,init,env)=>worker.fetch(new Request('https://nudge-api.example'+path,init),env);
+const health=await run('/health');assert.equal(health.status,200);assert.equal((await health.json()).aiConnected,false);
+const accepted=await run('/api/health',{headers:{Origin:'https://nikki0radz.github.io'}});assert.equal(accepted.headers.get('Access-Control-Allow-Origin'),'https://nikki0radz.github.io');
+const denied=await run('/health',{headers:{Origin:'https://other.example'}});assert.equal(denied.status,403);assert.equal(denied.headers.get('Access-Control-Allow-Origin'),null);
+assert.equal((await run('/health',{method:'POST'})).status,405);
+assert.equal((await run('/missing')).status,404);
+assert.equal((await run('/health',{method:'OPTIONS',headers:{Origin:'https://nikki0radz.github.io'}})).status,204);
+const secret='test-secret-do-not-leak';assert(!(await (await run('/health',undefined,{OPENAI_API_KEY:secret})).text()).includes(secret));
+console.log('Worker health, origin policy, methods, routes and secret isolation passed.');
