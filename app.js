@@ -36,4 +36,4 @@ function enhanceHome(){if(page!=='home')return;const form=document.querySelector
 function renderBusy(message){if(page==='home'){const label=document.querySelector('#record-label');if(label)label.textContent=message;document.querySelectorAll('.capture button,.capture textarea,#audio-recovery button').forEach(b=>b.disabled=true);}}
 async function connectAI(e){e.preventDefault();const button=e.target.querySelector('[type=submit]'),status=document.querySelector('#connect-status');button.disabled=true;status.textContent='Checking your private connection…';try{await NudgeAI.connect(document.querySelector('#access-code').value,document.querySelector('#remember-code').checked);settings();toast('Connected. You can leave your thoughts with Nudge.');}catch(error){status.textContent=error.message;button.disabled=false;}}
 document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();navigate('home');});
-render();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+render();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{});
