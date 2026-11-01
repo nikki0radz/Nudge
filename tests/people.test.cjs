@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),p=require('../people-core.js'),e=require('../engine.js');
+const now=Date.parse('2026-11-01T19:00:00Z');
+const source=[{id:'old-ellie',name:'Ellie',birthdayDay:20,birthdayMonth:9,birthdayYear:1999,entries:[{id:'gift1',type:'gift',value:'Disposable toilet brush',images:[]},{id:'allergy1',type:'allergy',value:'Peanuts'}]}];
+const imported=p.mergeImported([],source);assert.equal(imported.people.length,1);assert.equal(imported.people[0].birthday.year,1999);assert.equal(imported.people[0].entries[0].value,'Disposable toilet brush');assert.equal(p.mergeImported(imported.people,source).people[0].entries.length,2);assert.equal(source[0].entries.length,2);
+const update=(name,day,month,year)=>({personId:null,name,birthdayDay:day,birthdayMonth:month,birthdayYear:year,setPhoto:false,imageIndexes:[],entries:[]});
+const bulk=p.applyUpdates(imported.people,[update('Owen',3,10,1998),update('Ellie',20,9,1999)]);assert.equal(bulk.people.length,2);assert.equal(p.find(bulk.people,'OWEN').birthday.day,3);assert.equal(p.find(bulk.people,'Ellie').entries.length,2);
+const gift={...update('Ellie',null,null,null),entries:[{type:'gift',title:'',value:'Bird feeder',url:'https://example.com/bird',imageIndexes:[]}]};const more=p.applyUpdates(bulk.people,[gift]);assert.equal(p.find(more.people,'Ellie').entries.length,3);assert.equal(p.find(p.applyUpdates(more.people,[gift]).people,'Ellie').entries.length,3);
+assert.throws(()=>p.applyUpdates(bulk.people,[update('Owen',31,2,1998)]),/birthday/);assert.equal(p.find(bulk.people,'Owen').birthday.month,10);
+const linked=p.linkTask({title:'Get Ellie a gift',next:null,deadline:null,peopleNames:['Ellie'],places:['Shopping'],occasion:{type:'birthday',personName:'Ellie',leadDays:7}},more.people,now,{},'Europe/London');assert(linked.peopleIds.includes('old-ellie'));assert.equal(new Date(linked.deadline).toISOString(),'2027-09-13T11:00:00.000Z');assert(linked.next<linked.deadline);assert(linked.deadline<=p.birthdayTime(p.find(more.people,'Ellie'),now,'Europe/London')-7*86400000);
+const missing=p.linkTask({title:'Get Lily a gift',occasion:{type:'birthday',personName:'Lily',leadDays:7}},more.people,now,{},'Europe/London');assert.equal(missing.deadline,null);assert(missing.context.includes('Lily'));
+const after=now+3*86400000;const constrained=e.constrain({title:'Look for wedding shoes',original:'Remind me after three days',next:now+1000,notBefore:after},{});assert(constrained.next>=after);
+assert.equal(p.safeURL('javascript:alert(1)'),'');assert.equal(p.safeURL('https://example.com/gift'),'https://example.com/gift');assert.equal(p.image('data:image/svg+xml;base64,xxx'),'');
+assert.throws(()=>p.find([{id:'a',name:'Ellie',aliases:[]},{id:'b',name:'Ellie',aliases:[]}],'Ellie'),/more than one/);
+console.log('People migration, non-destructive import, bulk birthdays, gifts, duplicates, identity, birthday offsets, lower bounds and safe media passed.');

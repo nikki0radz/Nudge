@@ -37,7 +37,7 @@ function constrain(task,settings={},reference=Date.now(),now=Date.now()){
  const inferred=constraints.extractDeadline(task.original||'',reference);
  const deadline=inferred!==null?inferred:Number.isFinite(task.deadline)?task.deadline:null;
  const candidate=Number.isFinite(task.next)?task.next:choose(task.title||'',settings,now);
- const next=constraints.schedule(candidate,deadline,settings,now);
+ let next=constraints.schedule(candidate,deadline,settings,now);if(Number.isFinite(task.notBefore)&&next<task.notBefore)next=windowTime(task.notBefore,settings);
  return {...task,next,deadline,...(deadline!==null?{timing:'spoken',context:deadline<=now?'The requested deadline has passed.':null}:{}),timingVersion:2};
 }
 function repairDeadlines(tasks,settings={},now=Date.now()){

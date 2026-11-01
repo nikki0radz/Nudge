@@ -1,0 +1,35 @@
+/* Shared, deterministic people storage and birthday rules. No API access. */
+(function(root){
+const time=typeof module!=='undefined'&&module.exports?require('./timing.js'):root.NudgeTiming;
+const key=s=>String(s||'').normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g,' ');
+const uid=()=>typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
+const text=(s,max=4000)=>typeof s==='string'?s.trim().slice(0,max):'';
+const image=s=>typeof s==='string'&&/^data:image\/(?:jpeg|png|webp|gif);base64,[a-zA-Z0-9+/=]+$/.test(s)?s:'';
+function birthday(day,month,year){if(day===null&&month===null)return null;day=Number(day);month=Number(month);year=year?Number(year):null;const y=year||2000,d=new Date(Date.UTC(y,month-1,day));if(!day||!month||month<1||month>12||day<1||day>31||d.getUTCDate()!==day||d.getUTCMonth()!==month-1||(year&&(year<1900||year>new Date().getFullYear())))throw Error('Please check the birthday date.');return {day,month,year};}
+function normalize(raw){if(!raw||typeof raw.name!=='string'||!raw.name.trim())throw Error('A name is needed.');let b=raw.birthday&&typeof raw.birthday==='object'?raw.birthday:null;if(typeof raw.birthday==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(raw.birthday)){const [y,m,d]=raw.birthday.split('-').map(Number);b={day:d,month:m,year:y};}if(raw.birthdayDay&&raw.birthdayMonth)b={day:raw.birthdayDay,month:raw.birthdayMonth,year:raw.birthdayYear||null};try{b=b?birthday(b.day,b.month,b.year):null;}catch{b=null;}
+ let entries=Array.isArray(raw.entries)?raw.entries:[];
+ if(!Array.isArray(raw.entries)){for(const [field,type] of [['gifts','gift'],['likes','like'],['allergies','allergy'],['notes','note']]){const values=Array.isArray(raw[field])?raw[field]:raw[field]?[raw[field]]:[];entries.push(...values.map(value=>({type,value})));}if(raw.otherDate)entries.push({type:'date',title:raw.otherDateLabel||'Important date',value:raw.otherDate});}
+ return {id:text(raw.id,100)||uid(),name:text(raw.name,120),aliases:Array.isArray(raw.aliases)?raw.aliases.map(x=>text(x,120)).filter(Boolean):[],birthday:b,imageData:image(raw.imageData||raw.photoSourceData),entries:entries.filter(e=>e&&typeof e==='object').map(e=>({...e,id:text(e.id,100)||uid(),type:text(e.type,60)||'note',title:text(e.title,300),value:text(e.value||e.text),url:safeURL(e.url),images:Array.isArray(e.images)?e.images.map(image).filter(Boolean):[],created:Number(e.created)||Date.now()})),created:Number(raw.created)||Date.now(),sourceId:raw.sourceId||raw.id||null};
+}
+function safeURL(s){try{const u=new URL(s);return ['http:','https:'].includes(u.protocol)?u.href:'';}catch{return '';}}
+function find(people,name,id){if(id){const p=people.find(x=>x.id===id);if(p)return p;}const matches=people.filter(p=>key(p.name)===key(name)||p.aliases?.some(a=>key(a)===key(name)));if(matches.length>1)throw Error(`There’s more than one ${name}. Please use their full name.`);return matches[0]||null;}
+function applyUpdates(current,updates,images=[]){const people=structuredClone(current);let count=0;
+ for(const update of updates){const name=text(update.name,120);if(!name)throw Error('A name is needed to save this information.');let p=find(people,name,update.personId);if(!p){p=normalize({name});people.push(p);}if(update.birthdayDay!==null&&update.birthdayDay!==undefined){p.birthday=birthday(update.birthdayDay,update.birthdayMonth,update.birthdayYear);count++;}
+ if(update.setPhoto){const photo=image(images[update.imageIndexes?.[0]||0]);if(photo){p.imageData=photo;count++;}}
+ for(const entry of update.entries||[]){const e={id:uid(),type:text(entry.type,60)||'note',title:text(entry.title,300),value:text(entry.value),url:safeURL(entry.url),images:(entry.imageIndexes||[]).map(i=>image(images[i])).filter(Boolean),created:Date.now()};if(!e.value&&!e.url&&!e.images.length)continue;const old=entry.id?p.entries.find(x=>x.id===entry.id):p.entries.find(x=>key(x.type)===key(e.type)&&key(x.value)===key(e.value)&&key(x.url)===key(e.url));if(old){if(entry.id)Object.assign(old,{...e,id:old.id});else old.images=[...new Set([...(old.images||[]),...e.images])];}else p.entries.push(e);count++;}
+ }return {people,count};
+}
+function mergeImported(current,source){const result=structuredClone(current);let count=0;
+ for(const raw of source){let incoming;try{incoming=normalize(raw);}catch{continue;}let p=result.find(x=>x.id===incoming.id||x.sourceId&&x.sourceId===(incoming.sourceId||incoming.id));if(!p){const names=result.filter(x=>key(x.name)===key(incoming.name));if(names.length===1)p=names[0];}
+ if(!p){result.push(incoming);count++;continue;}if(!p.imageData)p.imageData=incoming.imageData;if(!p.birthday)p.birthday=incoming.birthday;
+ for(const e of incoming.entries){if(!p.entries.some(x=>x.id===e.id||(key(x.type)===key(e.type)&&key(x.value)===key(e.value)&&key(x.title)===key(e.title))))p.entries.push(e);}p.sourceId=p.sourceId||incoming.sourceId||incoming.id;
+ }return {people:result,count};
+}
+function birthdayTime(person,now=Date.now(),zone){if(!person?.birthday)return null;const p=time.localParts(now,zone||Intl.DateTimeFormat().resolvedOptions().timeZone),b=person.birthday;let year=p.year;
+ const make=y=>{const d=new Date(Date.UTC(y,b.month-1,b.day));if(d.getUTCMonth()!==b.month-1)return time.zonedTime({year:y,month:2,day:28,hour:12},zone);return time.zonedTime({year:y,month:b.month,day:b.day,hour:12},zone);};let date=make(year);if(date<=now)date=make(++year);return date;}
+function linkTask(task,people,now=Date.now(),settings={},zone){const names=Array.isArray(task.peopleNames)?task.peopleNames:[];const peopleIds=[...new Set(names.map(name=>find(people,name)?.id).filter(Boolean))];let next=task.next,deadline=task.deadline,context=task.context;
+ const o=task.occasion;if(o&&o.type==='birthday'){const person=find(people,o.personName)||people.find(p=>task.peopleIds?.includes(p.id));if(person&&!peopleIds.includes(person.id))peopleIds.push(person.id);const birthdayAt=birthdayTime(person,now,zone);if(birthdayAt){const lead=Math.max(0,Math.min(365,Number(o.leadDays)||0));const p=time.localParts(birthdayAt,zone),d=new Date(Date.UTC(p.year,p.month-1,p.day-lead));deadline=time.zonedTime({year:d.getUTCFullYear(),month:d.getUTCMonth()+1,day:d.getUTCDate(),hour:12},zone);next=deadline>now?Math.max(now+1000,deadline-3600000):now+60000;context=deadline<=now?'The requested birthday lead time has already started.':null;}else{deadline=null;next=null;context=`Add ${o.personName}’s birthday and I’ll time this ${o.leadDays||0} days ahead.`;}}
+ return {...task,birthdaySignature:o?.type==='birthday'?JSON.stringify((find(people,o.personName)||people.find(p=>task.peopleIds?.includes(p.id)))?.birthday||null):null,peopleIds,places:Array.isArray(task.places)?task.places.map(x=>text(x,100)).filter(Boolean):[],next,deadline,context,...(Number.isFinite(deadline)?{timing:'spoken'}:{})};
+}
+const api={key,normalize,birthday,find,applyUpdates,mergeImported,birthdayTime,linkTask,safeURL,image};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgePeopleCore=api;
+})(typeof window!=='undefined'?window:globalThis);

@@ -34,3 +34,14 @@ node tests/worker.test.mjs
 node tests/client.test.cjs
 ```
 Worker tests mock OpenAI; a live authenticated voice/text request requires entering the private code in the app. Tests must not use real secrets or user recordings.
+
+## People and shared assistant
+The People tab combines profiles, birthdays, allergies, gifts, links, pictures and casual notes with person-linked reminders. The home microphone and text box both use `/api/assistant`: questions retrieve saved evidence; information updates profiles; requests create reminders. No mode switch is needed. The answer appears on the home screen, with links to matching reminders and notes. An optional read-aloud control uses browser speech synthesis.
+
+The Worker uses the existing `APP_TOKEN` and `OPENAI_API_KEY` Secrets. `/api/interpret` remains available for older clients. The assistant uses a strict multi-intent schema, validates referenced IDs and dates, accepts up to two compressed images, and never opens saved URLs or executes tasks. Explicit before/by deadlines still use independent constraints. Birthday offsets and availability lower bounds are applied in code after interpretation. Missing birthdays remain linked and resolve when a birthday is supplied.
+
+People and images live locally in IndexedDB (`nudge-people-v1`) to avoid overflowing localStorage with photos. They are included in Nudge JSON backups. Source Friend Dossier data is copied from the known same-origin keys (`friendDossier.v4` and earlier variants) when available, keeping the source intact. The Copy Friend Dossier button repeats a non-destructive merge; JSON imports accept Friend Dossier backups from another browser. Imports retain entry data, photos and custom category labels, not the old app's visual themes. People are not published into GitHub source. Questions send relevant saved notes and active reminder context to the authenticated backend/OpenAI; profile pictures are not sent automatically. Captured attachments are sent only with the submitted thought.
+
+Shared-input photos can be product images or screenshots with a caption or voice description. Profile portraits can be set manually. The app does not identify people or infer birthdays/allergies from faces, fetch TikTok pages or browse arbitrary links. Photos used for an unresolved clarification remain attached for the follow-up.
+
+Additional checks: `node tests/people.test.cjs` and `node tests/assistant.test.mjs`. Browser QA covers manual profiles, notes, pictures, persistence and the centred tick. Authenticated model responses use mocked upstream tests; private user codes are never needed for development.

@@ -5,7 +5,7 @@ const originalFetch=globalThis.fetch;let calls=[];let upstream;
 globalThis.fetch=async(url,init)=>{calls.push({url,init});return upstream?upstream(url,init):Response.json({output:[{content:[{type:'output_text',text:JSON.stringify({tasks:[{title:'Buy Ellie Monster',original:'buy Ellie Monster',tags:['Shopping','Ellie'],timing:'context',next:null,deadline:null,context:'Before seeing Ellie',duplicateId:'existing-1'}]})}]}]});};
 const run=(path,body,options={})=>worker.fetch(new Request('https://test.example'+path,{method:options.method||'POST',headers:{Origin:options.origin||'https://nikki0radz.github.io',Authorization:'Bearer '+(options.code??env.APP_TOKEN),'Content-Type':'application/json'},...(options.method==='GET'?{}:{body:JSON.stringify(body||{})})}),options.env||env);
 try{
- const health=await run('/health',null,{method:'GET'});assert.equal(health.status,200);assert.equal((await health.json()).stage,'ai-v2-deadlines');
+ const health=await run('/health',null,{method:'GET'});assert.equal(health.status,200);assert.equal((await health.json()).stage,'ai-v3-people');
  assert.equal((await run('/api/connect',{}, {code:'wrong'})).status,401);assert.equal(calls.length,0);
  assert.equal((await run('/api/connect',{}, {env:{OPENAI_API_KEY:'x'}})).status,503);
  assert.equal((await run('/api/connect',{}, {env:{APP_TOKEN:env.APP_TOKEN}})).status,503);

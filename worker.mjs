@@ -1,4 +1,5 @@
 import timing from './timing.js';
+import {runAssistant} from './assistant.mjs';
 const DEFAULT_ORIGIN = 'https://nikki0radz.github.io';
 const MAX_JSON = 100000;
 const MAX_AUDIO = 20 * 1024 * 1024;
@@ -89,18 +90,18 @@ export default {
       if(origin&&origin!==allowed)return json({error:'Origin not allowed'},403);
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
       const path=new URL(request.url).pathname;
-      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v2-deadlines',authenticationRequired:true});
-      if(!['/api/connect','/api/interpret','/api/transcribe'].includes(path))return json({error:'Not found'},404);
+      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v3-people',authenticationRequired:true});
+      if(!['/api/connect','/api/interpret','/api/transcribe','/api/assistant'].includes(path))return json({error:'Not found'},404);
       if(request.method!=='POST')return json({error:'Method not allowed'},405);
       if(!env.APP_TOKEN)return json({error:'Add APP_TOKEN as a runtime Secret in Cloudflare.'},503);
       const bearer=request.headers.get('Authorization')||'';
       if(!bearer.startsWith('Bearer ')||bearer.length>4096||!await sameToken(bearer.slice(7),env.APP_TOKEN))return json({error:'That access code doesn’t match. Please check it and try again.'},401);
       if(!env.OPENAI_API_KEY)return json({error:'Add OPENAI_API_KEY as a runtime Secret in Cloudflare.'},503);
       if(path==='/api/connect')return json({connected:true,service:'nudge-api',model:env.OPENAI_MODEL||'gpt-4.1-mini'});
-      if(path==='/api/interpret'){
+      if(path==='/api/interpret'||path==='/api/assistant'){
         if(!request.headers.get('Content-Type')?.includes('application/json'))throw new ApiError('Expected a JSON reminder.');
-        const bytes=await limitedBody(request,MAX_JSON);let input;try{input=JSON.parse(new TextDecoder().decode(bytes));}catch{throw new ApiError('The reminder request could not be read.');}
-        return json(await interpret(input,env));
+        const bytes=await limitedBody(request,path==='/api/assistant'?3800000:MAX_JSON);let input;try{input=JSON.parse(new TextDecoder().decode(bytes));}catch{throw new ApiError('The reminder request could not be read.');}
+        return json(path==='/api/assistant'?await runAssistant(input,env,{openai,cleanInput,cleanTasks,ApiError,taskProperties}).catch(error=>{if(error instanceof ApiError)throw error;if(/more than one|check the birthday|A name is needed/.test(error.message))throw new ApiError(error.message);throw error;}):await interpret(input,env));
       }
       const bytes=await limitedBody(request,MAX_AUDIO+100000);
       let form;try{form=await new Response(bytes,{headers:{'Content-Type':request.headers.get('Content-Type')||''}}).formData();}catch{throw new ApiError('The recording upload could not be read.');}

@@ -55,5 +55,5 @@ function schedule(candidate,deadline,settings={},now=Date.now(),zone){
  // An explicit imminent deadline takes priority if quiet hours leave no valid interval.
  return Math.min(latest,Math.round(best===null?Math.max(earliest,Math.min(latest,preferred)):best));
 }
-const api={extractDeadline,schedule};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgeTiming=api;
+const api={extractDeadline,schedule,localParts,zonedTime};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgeTiming=api;
 })(typeof window!=='undefined'?window:globalThis);
