@@ -23,7 +23,7 @@ Status: requested for a future update; reminder-card and mascot designs are bein
 
 ### Calendar design comparison (preview)
 - Five interactive studies under Reminders → calendar → Try five calendar layouts: Paper grid, Soft columns, Month + agenda, Time lanes, Open diary. Shared category colours, month / rolling eight-date week, controlled zoom and sample editing; real data is read only here.
-- Collect Nicole’s choice before replacing the main calendar. Verify two-finger pinch and horizontal scrolling on her Android phone; browser checks cover buttons, slider, dates and layouts.
+- Selected calendar: 3, Month + agenda, now the default preview calendar with real event editing, compact single-line event labels, a centred colour key and subtle minus/plus controls. Comparison controls are tucked away in Calendar options → Try with sample events. Verify two-finger pinch and horizontal scrolling on her Android phone; browser checks cover button zoom, dates, selected-day scrolling and layouts.
 - Next native calendar release: include Android CalendarContract event/display/calendar colour fields in sync so Google’s source colours can be retained. The current native payload omits these fields. Preview honours a valid colour when present and otherwise uses its category palette; categorisation is a local display heuristic, not a new AI sync feature.
 
 ## People dates, countdowns and archive
