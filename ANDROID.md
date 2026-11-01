@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.0
+# Nudge for Android · 0.1.1
 
-Download `downloads/nudge-0.1.0.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.1.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -16,12 +16,10 @@ Settings → Notifications enables native reminders with Done and Remind me agai
 
 ## Automatic encrypted cloud backups
 
-One private R2 bucket is required. It can stay entirely private: do not enable r2.dev or add a public domain.
+The existing private `unscripted-backups` R2 bucket can be reused. Nudge only writes beneath `nudge/private/`. Keep it entirely private: do not enable r2.dev or add a public domain.
 
-1. Cloudflare → R2 → Create bucket → name **nudge-backups**.
-2. Open Worker **nudge-api** → Settings → Builds. Set its deploy command to:
-   `npx wrangler deploy --config wrangler.backups.jsonc`
-   Then retry/deploy the latest GitHub build. This configuration creates the **BACKUPS** R2 binding and preserves it on later GitHub deployments. Keep the existing APP_TOKEN and OPENAI_API_KEY secrets. No bucket access key is needed in the app.
+1. GitHub deployment now binds **nudge-api** to the existing private **unscripted-backups** bucket as **BACKUPS**. Both Wrangler configurations include this binding, so no deployment-command change or new bucket is required. If your bucket actually has a different name, change `bucket_name` in both configuration files to its exact name.
+2. Keep the existing APP_TOKEN and OPENAI_API_KEY secrets. No bucket access key is needed in the app.
 3. In Nudge Settings → Private cloud backups, choose a recovery password of at least twelve characters and enable automatic backups. Keep it in your password manager, along with your app access code. The first successful upload must appear before relying on recovery.
 
 Backups use AES-256-GCM with a random IV, a PBKDF2-SHA256 derived key (310,000 iterations), and a fresh salt when setting/changing the recovery password. Only ciphertext is uploaded. A non-extractable derived key is kept in the app’s private IndexedDB so subsequent backups need no typing; the password is not sent to the server. On a lost/replacement phone, install Nudge, connect using the app access code, enter the recovery password and choose Restore cloud backup. An account sign-in is not required for this single-user setup. Anyone with your access code could access or overwrite encrypted backup files, so keep that code private. They still need the recovery password to read them. There is no password reset that can decrypt lost-password backups.
