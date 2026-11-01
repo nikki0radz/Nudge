@@ -8,3 +8,5 @@ Nicole tests visual changes through the Android app's **Preview upcoming changes
 - Keep every Settings section collapsible. Keep the native Preview bar and Back to stable escape route usable even when preview UI breaks.
 - Preserve the package ID, signing identity, https://nudge.local storage origin, and existing private backup prefix. See ANDROID.md for build, backup and migration details.
 - Before publishing, verify the preview signature/file hashes, run relevant tests, and check the UI in the browser where useful. Native device behaviour cannot be proven by browser tests; report that limit plainly.
+
+- Use sentence case throughout the UI. Nicole dislikes all-caps labels and oversized reminder tiles. Compact reminder try-outs live under Today → Try five smaller reminder styles; they must only mutate their sample data. The owl is a real PNG embedded in the signed preview manifest for offline use, not a hand-redrawn SVG.

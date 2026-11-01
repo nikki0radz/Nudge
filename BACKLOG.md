@@ -16,5 +16,7 @@ Status: requested for a future update; reminder-card and mascot designs are bein
 
 - Keep a completed reminder visible briefly so the tick can be seen, then animate a gentle scribbled strike-through before moving it into Completed. Make the destination clear rather than making it instantly disappear.
 - Show a small encouraging celebration such as “Good job”, optionally with a short joke or fun fact from a curated local bank. Prefer immediate offline feedback without an extra AI call for each completion. Include reduced-motion support and a way to undo accidental completion.
-- Explore a small consistent cartoon mascot with about five facial expressions. Matching transparent PNGs are sufficient; swap expressions with a simple crossfade/bob. No complex animation file or runtime is required. Await character/design selection before building it.
+- Explore a small consistent cartoon mascot with about five facial expressions. Matching transparent PNGs are sufficient; swap expressions with a simple crossfade/bob. No complex animation file or runtime is required. Olive the owl is selected. A real PNG test is now embedded in preview; the five-expression reward flow still needs building.
 - Reminder tiles should be compact enough to show several at once. Tags should be tiny or tucked away. Replace the diagonal up-right arrow beside Remind me again with a gentler icon/label after a card design is selected.
+
+- On the next native release, use sentence case for the Android preview bar buttons as well (`setAllCaps(false)`); this native styling cannot be changed by a web preview alone.
