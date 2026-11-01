@@ -42,3 +42,9 @@ Status: visual samples are in preview; live date processing is requested for the
 - Five recording layouts are available in Today → Try five recording layouts: Rosy dock, Little folder, Slim shelf, Soft capsule and Paper pocket. The selected style persists on the device.
 - Removed the idle Tap to tell me label and the redundant capture description; text and photo entry sit together in the capture card footer. Recording/paused timers, stop/save, pause/resume, loading and audio recovery remain available.
 - Recording and Paused example buttons are visual-only and never request microphone access or create audio. Close the comparison panel or tap the example stop button to return to real capture. Collect Nicole’s layout choice before stable release; verify real audio capture on her phone.
+
+## Compact activity history
+
+- Remove the Last saved card from Today (done in preview); preserve saved data and the immediate save/edit confirmation.
+- Future Reminders tab History button: a small chronological text list grouped by day, with short descriptions such as Added a gift idea for a person or Set a reminder. Truncate long content, avoid individual cards, and link to the relevant item where it still exists. Store actual save events reliably across typed/voice/photo capture, edits and imports before presenting it as a complete history; do not infer an inaccurate audit trail from current entries alone.
+- Approved capture layout: 2, Little folder, with a larger full-width microphone and What’s next on your list? above the folder. Approved thought category menu: 1, Folder dropdown; its chevron now uses a centred vector icon rather than a text glyph.
