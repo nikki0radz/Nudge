@@ -25,3 +25,14 @@ Status: requested for a future update; reminder-card and mascot designs are bein
 - Five interactive studies under Reminders → calendar → Try five calendar layouts: Paper grid, Soft columns, Month + agenda, Time lanes, Open diary. Shared category colours, month / rolling eight-date week, controlled zoom and sample editing; real data is read only here.
 - Collect Nicole’s choice before replacing the main calendar. Verify two-finger pinch and horizontal scrolling on her Android phone; browser checks cover buttons, slider, dates and layouts.
 - Next native calendar release: include Android CalendarContract event/display/calendar colour fields in sync so Google’s source colours can be retained. The current native payload omits these fields. Preview honours a valid colour when present and otherwise uses its category palette; categorisation is a local display heuristic, not a new AI sync feature.
+
+## People dates, countdowns and archive
+
+Status: visual samples are in preview; live date processing is requested for the next functional update.
+
+- Preserve recurring birthdays and anniversaries in Important dates; show the next occurrence and sort all upcoming dates by next occurrence, including year boundaries.
+- Once a one-off event has ended (after the local day ends when it has no end time), move it out of the active list into a per-person archive. Preserve the original note, dates, links and photos; allow opening and restoring. Do not guess whether a date recurs or archive ambiguous free text. Add/confirm explicit date and recurrence fields, including manual editing and AI capture.
+- Show a compact profile countdown for any next important event within 30 days. Show upcoming events on Today within seven days, naming the person, event and relative date; offer a relevant gentle prompt without claiming a gift is needed for every occasion. Handle today, all-day dates, timezones and leap days.
+- Add a soft, decorative locked/top-secret archive folder at the bottom of the person, opening letter-like archived notes. The lock is decoration only, with no extra authentication.
+- Five interactive header and countdown designs plus a sample archive letter are available through Try profile & event styles. Sample dates do not mutate or hide actual entries. Choose countdown styling before implementing live behaviour.
+- Approved reminder design: 2, Folder slips, now applied to real reminder rows in preview. People notes have tighter spacing. Five inline category menu styles replace the native Android choice popup; the selected menu and header styles are remembered on this device for preview.
