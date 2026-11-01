@@ -1,5 +1,5 @@
-const CACHE='nudge-shell-v6';
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./style.css?v=5','./engine.js?v=5','./timing.js?v=5','./people-core.js?v=5','./people.js?v=5','./photos.js?v=5','./app.js?v=5','./ai-client.js?v=5','./recording.js?v=5','./icon.svg','./manifest.webmanifest'])));self.skipWaiting();});
+const CACHE='nudge-shell-v7';
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./style.css?v=6','./engine.js?v=6','./timing.js?v=6','./people-core.js?v=6','./people.js?v=6','./photos.js?v=6','./intent.js?v=6','./calendar.js?v=6','./receipts.js?v=6','./native.js?v=6','./backups.js?v=6','./app.js?v=6','./ai-client.js?v=6','./recording.js?v=6','./icon.svg','./manifest.webmanifest'])));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('nudge-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET'||new URL(event.request.url).origin!==self.location.origin)return;event.respondWith(fetch(event.request,{cache:'no-cache'}).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(c=>c.put(event.request,copy));}return response;}).catch(()=>caches.match(event.request).then(response=>response|| (event.request.mode==='navigate'?caches.match('./index.html'):Response.error()))));});
 

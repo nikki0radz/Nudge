@@ -48,3 +48,7 @@ Additional checks: `node tests/people.test.cjs` and `node tests/assistant.test.m
 
 ## Photo controls
 People profiles have a direct Add/Change photo control, Choose photo and Take photo actions, and horizontal/vertical/zoom crop previews. The original compressed source and crop settings are retained. Notes and categories have Add photos actions, removable thumbnail previews, camera capture and support for pictures without a written caption. Saved pictures open in a gallery with previous/next controls, arrow keys and horizontal swiping. The bottom navigation contains Today, Reminders and People; Settings remains accessible from the top gear. `node tests/photos.test.cjs` checks crop geometry and retained source metadata.
+
+## Android, calendar and encrypted backups
+
+See [ANDROID.md](ANDROID.md) for the installable APK, preserving existing Friend Dossier data, synced phone/Google calendars, private R2 setup, recovery and signed app updates. The optional backup deploy configuration is `wrangler.backups.jsonc`; create the private bucket before selecting it.

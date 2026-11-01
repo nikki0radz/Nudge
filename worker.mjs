@@ -1,4 +1,5 @@
 import timing from './timing.js';
+import {handleBackup} from './backup-api.mjs';
 import {runAssistant} from './assistant.mjs';
 const DEFAULT_ORIGIN = 'https://nikki0radz.github.io';
 const MAX_JSON = 100000;
@@ -82,20 +83,21 @@ async function interpret(value, env) {
 }
 export default {
   async fetch(request, env={}) {
-    const origin=request.headers.get('Origin'), allowed=env.ALLOWED_ORIGIN||DEFAULT_ORIGIN;
+    const origin=request.headers.get('Origin'), allowed=env.ALLOWED_ORIGIN||DEFAULT_ORIGIN;const allowedOrigins=new Set([...allowed.split(',').map(s=>s.trim()),'https://nudge.local']);
     const headers=new Headers({'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin'});
-    if(origin===allowed){headers.set('Access-Control-Allow-Origin',allowed);headers.set('Access-Control-Allow-Methods','GET, POST, OPTIONS');headers.set('Access-Control-Allow-Headers','Content-Type, Authorization');}
+    if(allowedOrigins.has(origin)){headers.set('Access-Control-Allow-Origin',origin);headers.set('Access-Control-Allow-Methods','GET, POST, OPTIONS');headers.set('Access-Control-Allow-Headers','Content-Type, Authorization, X-Nudge-Encryption');}
     const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers});
     try {
-      if(origin&&origin!==allowed)return json({error:'Origin not allowed'},403);
+      if(origin&&!allowedOrigins.has(origin))return json({error:'Origin not allowed'},403);
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
       const path=new URL(request.url).pathname;
-      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v3-people',authenticationRequired:true});
-      if(!['/api/connect','/api/interpret','/api/transcribe','/api/assistant'].includes(path))return json({error:'Not found'},404);
-      if(request.method!=='POST')return json({error:'Method not allowed'},405);
+      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v4-mobile',authenticationRequired:true});
+      if(!['/api/connect','/api/interpret','/api/transcribe','/api/assistant','/api/backup','/api/backup/latest'].includes(path))return json({error:'Not found'},404);
+      if(request.method!=='POST'&&!path.startsWith('/api/backup'))return json({error:'Method not allowed'},405);
       if(!env.APP_TOKEN)return json({error:'Add APP_TOKEN as a runtime Secret in Cloudflare.'},503);
       const bearer=request.headers.get('Authorization')||'';
       if(!bearer.startsWith('Bearer ')||bearer.length>4096||!await sameToken(bearer.slice(7),env.APP_TOKEN))return json({error:'That access code doesn’t match. Please check it and try again.'},401);
+      if(path.startsWith('/api/backup'))return await handleBackup(request,env,json);
       if(!env.OPENAI_API_KEY)return json({error:'Add OPENAI_API_KEY as a runtime Secret in Cloudflare.'},503);
       if(path==='/api/connect')return json({connected:true,service:'nudge-api',model:env.OPENAI_MODEL||'gpt-4.1-mini'});
       if(path==='/api/interpret'||path==='/api/assistant'){

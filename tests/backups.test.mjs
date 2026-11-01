@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';import worker from '../worker.mjs';
+const store=new Map(),bucket={async get(key){const value=store.get(key);return value===undefined?null:{json:async()=>JSON.parse(value),body:value};},async put(key,value){store.set(key,typeof value==='string'?value:await new Response(value).text());}};
+const env={APP_TOKEN:'synthetic-backup-token',BACKUPS:bucket};
+const run=(path,method='GET',code=env.APP_TOKEN,body)=>worker.fetch(new Request('https://example.test'+path,{method,headers:{Origin:'https://nudge.local',Authorization:'Bearer '+code,'X-Nudge-Encryption':'AES-256-GCM'},body}),env);
+assert.equal((await run('/api/backup','GET','bad')).status,401);
+assert.equal((await run('/api/backup')).status,200);assert.equal((await run('/api/backup/latest')).status,404);
+const ciphertext=JSON.stringify({version:1,algorithm:'AES-256-GCM',ciphertext:'synthetic-encrypted-bytes'});
+const uploaded=await run('/api/backup','POST',env.APP_TOKEN,ciphertext);assert.equal(uploaded.status,200);assert.equal((await uploaded.json()).saved,true);
+const restored=await run('/api/backup/latest');assert.equal(await restored.text(),ciphertext);assert.equal(restored.headers.get('Access-Control-Allow-Origin'),'https://nudge.local');
+const missing=await worker.fetch(new Request('https://example.test/api/backup',{headers:{Authorization:'Bearer '+env.APP_TOKEN}}),{APP_TOKEN:env.APP_TOKEN});assert.equal((await missing.json()).available,false);
+console.log('Private backup auth, optional storage, encrypted upload/retrieval and Android CORS passed.');
