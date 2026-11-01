@@ -1,0 +1,31 @@
+package com.nicole.nudge;
+import android.content.*;import android.content.pm.*;import android.os.Build;import android.util.Base64;import org.json.*;import java.io.*;import java.net.*;import java.security.*;import java.security.cert.*;import java.util.*;
+/** Opt-in, signed web UI snapshots. The native bridge and storage origin never change. */
+final class PreviewManager {
+ static final String BASE="https://nikki0radz.github.io/Nudge/preview/";
+ static final Set<String> FILES=new HashSet<>(Arrays.asList("index.html","style.css","timing.js","people-core.js","intent.js","engine.js","ai-client.js","recording.js","photos.js","people.js","calendar.js","receipts.js","native.js","backups.js","app.js","icon.svg","manifest.webmanifest"));
+ private final Context context;private final SharedPreferences prefs;private volatile File active;
+ PreviewManager(Context c){context=c;prefs=c.getSharedPreferences("nudge-preview",0);String folder=prefs.getString("folder","");if(prefs.getBoolean("enabled",false)&&folder.matches("ui-preview-[0-9]+")){File dir=new File(c.getFilesDir(),folder);boolean complete=true;for(String name:FILES)complete&=new File(dir,name).isFile();if(complete)active=dir;else prefs.edit().putBoolean("enabled",false).apply();}}
+ boolean enabled(){return active!=null;}
+ JSONObject status()throws JSONException{return new JSONObject().put("supported",true).put("enabled",enabled()).put("revision",enabled()?prefs.getString("revision",""):"");}
+ InputStream open(String path)throws IOException{File dir=active;String name=path.startsWith("/")?path.substring(1):path;if(dir==null)return context.getAssets().open("www/"+name);if(!FILES.contains(name))throw new FileNotFoundException();return new FileInputStream(new File(dir,name));}
+ void disable(){active=null;prefs.edit().putBoolean("enabled",false).apply();}
+ File prepare()throws Exception{
+  JSONObject envelope=new JSONObject(new String(get("manifest.json",65536),"UTF-8"));byte[] payload=Base64.decode(envelope.getString("payload"),Base64.DEFAULT),signature=Base64.decode(envelope.getString("signature"),Base64.DEFAULT);
+  PackageInfo pkg=context.getPackageManager().getPackageInfo(context.getPackageName(),Build.VERSION.SDK_INT>=28?PackageManager.GET_SIGNING_CERTIFICATES:PackageManager.GET_SIGNATURES);
+  android.content.pm.Signature[] signers=Build.VERSION.SDK_INT>=28?pkg.signingInfo.getApkContentsSigners():pkg.signatures;
+  java.security.cert.Certificate cert=CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(signers[0].toByteArray()));
+  java.security.Signature verifier=java.security.Signature.getInstance("SHA256withRSA");verifier.initVerify(cert.getPublicKey());verifier.update("NUDGE_UI_PREVIEW_V1\n".getBytes("UTF-8"));verifier.update(payload);if(!verifier.verify(signature))throw new IOException("This preview could not be verified. Stable Nudge is unchanged.");
+  JSONObject manifest=new JSONObject(new String(payload,"UTF-8"));long version=Build.VERSION.SDK_INT>=28?pkg.getLongVersionCode():pkg.versionCode;if(manifest.optInt("minimumNativeVersion",Integer.MAX_VALUE)>version)throw new IOException("Install the latest Nudge APK before trying this preview.");
+  String revision=manifest.getString("revision");if(!revision.matches("[a-f0-9]{12}"))throw new IOException("Invalid preview revision.");JSONArray files=manifest.getJSONArray("files");if(files.length()!=FILES.size())throw new IOException("Incomplete preview.");Set<String> seen=new HashSet<>();long total=0;
+  File dir=new File(context.getFilesDir(),"ui-preview-"+System.nanoTime());if(!dir.mkdir())throw new IOException("Preview storage is unavailable.");
+  try{for(int i=0;i<files.length();i++){JSONObject f=files.getJSONObject(i);String name=f.getString("path"),hash=f.getString("sha256");int size=f.getInt("size");if(!FILES.contains(name)||!seen.add(name)||!hash.matches("[a-f0-9]{64}")||size<1||size>2000000||(total+=size)>8000000)throw new IOException("Invalid preview files.");byte[] bytes=get(name+"?revision="+revision,size);if(bytes.length!=size||!hex(MessageDigest.getInstance("SHA-256").digest(bytes)).equals(hash))throw new IOException("The preview download was incomplete. Please try again.");try(FileOutputStream out=new FileOutputStream(new File(dir,name))){out.write(bytes);}}
+   try(FileOutputStream out=new FileOutputStream(new File(dir,"revision"))){out.write(revision.getBytes("UTF-8"));}return dir;
+  }catch(Exception e){remove(dir);throw e;}
+ }
+ void activate(File dir)throws Exception{String revision=new String(read(new FileInputStream(new File(dir,"revision")),32),"UTF-8");if(!prefs.edit().putString("folder",dir.getName()).putString("revision",revision).putBoolean("enabled",true).commit())throw new IOException("Could not save preview settings.");active=dir;for(File other:context.getFilesDir().listFiles())if(other.isDirectory()&&other.getName().matches("ui-preview-[0-9]+")&&!other.equals(dir))remove(other);}
+ static void remove(File dir){File[] files=dir.listFiles();if(files!=null)for(File f:files)f.delete();dir.delete();}
+ static byte[] get(String path,int limit)throws IOException{HttpURLConnection c=(HttpURLConnection)new URL(BASE+path).openConnection();c.setInstanceFollowRedirects(false);c.setConnectTimeout(15000);c.setReadTimeout(20000);c.setRequestProperty("Cache-Control","no-cache");try{if(c.getResponseCode()!=200)throw new IOException("Preview is unavailable. Your current version is unchanged.");return read(c.getInputStream(),limit);}finally{c.disconnect();}}
+ static byte[] read(InputStream input,int limit)throws IOException{try(InputStream in=input;ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] buffer=new byte[8192];int n;while((n=in.read(buffer))!=-1){if(out.size()+n>limit)throw new IOException("Preview file exceeds its size limit.");out.write(buffer,0,n);}return out.toByteArray();}}
+ static String hex(byte[] bytes){StringBuilder out=new StringBuilder();for(byte b:bytes)out.append(String.format(Locale.ROOT,"%02x",b&255));return out.toString();}
+}

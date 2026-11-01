@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.1
+# Nudge for Android · 0.1.2
 
-Download `downloads/nudge-0.1.1.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.2.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -31,3 +31,13 @@ Changes are backed up after approximately fifteen seconds while Nudge is open. A
 The APK contains the trusted offline UI. It checks the public `update.json` manifest on launch and provides a manual Check for app updates button. New versions download an APK; Android asks you to install it. Updates preserve local data when signed with the **same signing key**. Keep the private signing-recovery archive supplied with this build; it must never go in the public repository. This archive is separate from your notes/recovery password.
 
 Build with Java 17, Android API 35, and Android build tools. Set `NUDGE_ANDROID_SDK` to a directory containing `android-35/android.jar` and build tools in `android-15/` (or adapt the script paths). Set `NUDGE_KEYSTORE`, `NUDGE_STORE_PASSWORD`, then run `bash scripts/build-android.sh`. An Eclipse JDT compiler jar can be selected via `NUDGE_ECJ_JAR` if javac is absent. Increment manifest versionCode and versionName, build/verify the APK with the original signer, and update `update.json` plus the hosted download together. No app access code, OpenAI key, personal notes or signing secrets belong in the public APK/source.
+
+## In-app visual previews · 0.1.2+
+
+Settings → Preview upcoming changes → switch on. Nudge downloads the current signed web UI snapshot, checks its file hashes and compatibility, and reloads under the same local origin. Existing people, photos, reminders, settings and app access code stay in place. Preview mode is off by default, remains on across restarts, and caches its last successful version for offline use.
+
+Use Refresh preview after a new visual round is published. The native pink Preview bar also offers Refresh and Back to stable, even if the preview UI itself breaks. Back to stable loads the UI bundled with the installed APK; it does not delete or restore your notes. Finish recording/saving before changing versions. Previews use your actual local notes, so completed tasks and saved edits remain after switching back. Only backwards-compatible UI changes belong in this channel; schema migrations, new native permissions, and native APIs require an APK release.
+
+For visual-only feedback rounds: edit the files in `preview/`, run `python3 scripts/publish-preview.py --source preview` with the original signing keystore/password supplied via the environment, then commit **only `preview/`**. Do not update the APK or `update.json`. The stable UI stays bundled in Android. The publisher signs the manifest with the APK signing key (RSA/SHA-256 with a domain-separated payload); Android verifies it against its own signing certificate before accepting a fixed allowlist of files. A corrupt/incompatible/offline update leaves the current UI unchanged. The app never navigates the native bridge to a remote page or accepts a custom preview URL.
+
+When a batch is approved, copy the approved UI into a signed APK release and bump its version as normal. Keep the preview minimumNativeVersion in sync with any future native API requirements. The initial preview matches the current layout; later design iterations are published to the same channel.

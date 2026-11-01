@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const child=require('node:child_process');
+const toggle={disabled:true,checked:false},status={},refresh={hidden:true,disabled:false};const nodes={'#preview-upcoming':toggle,'#preview-status':status,'#refresh-preview':refresh};
+const context={window:{addEventListener(){}},document:{addEventListener(){},querySelector:s=>nodes[s]},recording:false,processing:false,voiceStarting:false,toast:()=>{}};vm.createContext(context);vm.runInContext(fs.readFileSync('native.js','utf8'),context);
+(async()=>{let enabled=false,fail=false;const calls=[];context.NativeBridge={available:()=>true,call:async(method,args)=>{calls.push(method);if(fail)throw Error('Offline; current preview kept.');if(method==='previewStatus')return {enabled,revision:'abc123'};if(method==='setPreview')enabled=args.enabled;return {enabled};}};
+await context.previewSettings();assert.equal(toggle.checked,false);assert.equal(toggle.disabled,false);assert.equal(refresh.hidden,true);
+toggle.checked=true;await toggle.onchange();assert.equal(enabled,true);assert(calls.includes('setPreview'));
+await context.previewSettings();assert.equal(refresh.hidden,false);fail=true;await refresh.onclick();assert.equal(toggle.checked,true);assert(status.textContent.includes('Offline'));assert.equal(refresh.disabled,false);
+toggle.checked=false;await toggle.onchange();assert.equal(toggle.checked,true);fail=false;toggle.checked=false;await toggle.onchange();assert.equal(enabled,false);
+context.NativeBridge.available=()=>false;await context.previewSettings();assert.equal(toggle.disabled,true);assert(status.textContent.includes('Android'));
+child.execFileSync('python3',['scripts/verify-preview.py'],{stdio:'inherit'});console.log('Preview switch, stable rollback request, offline refresh retention and browser fallback passed.');})().catch(e=>{console.error(e);process.exitCode=1;});
