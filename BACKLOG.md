@@ -36,3 +36,9 @@ Status: visual samples are in preview; live date processing is requested for the
 - Add a soft, decorative locked/top-secret archive folder at the bottom of the person, opening letter-like archived notes. The lock is decoration only, with no extra authentication.
 - Five interactive header and countdown designs plus a sample archive letter are available through Try profile & event styles. Sample dates do not mutate or hide actual entries. Choose countdown styling before implementing live behaviour.
 - Approved reminder design: 2, Folder slips, now applied to real reminder rows in preview. People notes have tighter spacing. Five inline category menu styles replace the native Android choice popup; the selected menu and header styles are remembered on this device for preview.
+
+## Compact home capture layout comparison
+
+- Five recording layouts are available in Today → Try five recording layouts: Rosy dock, Little folder, Slim shelf, Soft capsule and Paper pocket. The selected style persists on the device.
+- Removed the idle Tap to tell me label and the redundant capture description; text and photo entry sit together in the capture card footer. Recording/paused timers, stop/save, pause/resume, loading and audio recovery remain available.
+- Recording and Paused example buttons are visual-only and never request microphone access or create audio. Close the comparison panel or tap the example stop button to return to real capture. Collect Nicole’s layout choice before stable release; verify real audio capture on her phone.
