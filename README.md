@@ -45,3 +45,6 @@ People and images live locally in IndexedDB (`nudge-people-v1`) to avoid overflo
 Shared-input photos can be product images or screenshots with a caption or voice description. Profile portraits can be set manually. The app does not identify people or infer birthdays/allergies from faces, fetch TikTok pages or browse arbitrary links. Photos used for an unresolved clarification remain attached for the follow-up.
 
 Additional checks: `node tests/people.test.cjs` and `node tests/assistant.test.mjs`. Browser QA covers manual profiles, notes, pictures, persistence and the centred tick. Authenticated model responses use mocked upstream tests; private user codes are never needed for development.
+
+## Photo controls
+People profiles have a direct Add/Change photo control, Choose photo and Take photo actions, and horizontal/vertical/zoom crop previews. The original compressed source and crop settings are retained. Notes and categories have Add photos actions, removable thumbnail previews, camera capture and support for pictures without a written caption. Saved pictures open in a gallery with previous/next controls, arrow keys and horizontal swiping. The bottom navigation contains Today, Reminders and People; Settings remains accessible from the top gear. `node tests/photos.test.cjs` checks crop geometry and retained source metadata.

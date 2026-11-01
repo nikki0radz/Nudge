@@ -1,0 +1,6 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),people=require('../people-core.js');
+const sandbox={document:{addEventListener(){}}};vm.createContext(sandbox);vm.runInContext(fs.readFileSync(require.resolve('../photos.js'),'utf8'),sandbox);
+for(const [width,height] of [[1200,800],[800,1200],[800,800]])for(const x of [0,50,100])for(const y of [0,50,100])for(const zoom of [100,150,300]){const g=sandbox.photoGeometry(width,height,x,y,zoom);assert(g.crop>0);assert(g.sx>=0);assert(g.sy>=0);assert(g.sx+g.crop<=width+.01);assert(g.sy+g.crop<=height+.01);}
+const photo='data:image/jpeg;base64,YQ==',original='data:image/jpeg;base64,Yg==';const p=people.normalize({name:'Test',imageData:photo,photoSourceData:original,photoX:20,photoY:75,photoZoom:180});assert.equal(p.imageData,photo);assert.equal(p.photoSourceData,original);assert.equal(p.photoX,20);assert.equal(p.photoY,75);assert.equal(p.photoZoom,180);
+const index=fs.readFileSync(require.resolve('../index.html'),'utf8');assert(!index.includes('id="nav-settings"'));assert(index.includes('id="settings-button"'));assert(index.includes('id="nav-people"'));
+console.log('Portrait crop bounds, retained original and crop metadata, and three-tab navigation passed.');
