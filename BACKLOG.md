@@ -20,3 +20,8 @@ Status: requested for a future update; reminder-card and mascot designs are bein
 - Reminder tiles should be compact enough to show several at once. Tags should be tiny or tucked away. Replace the diagonal up-right arrow beside Remind me again with a gentler icon/label after a card design is selected.
 
 - On the next native release, use sentence case for the Android preview bar buttons as well (`setAllCaps(false)`); this native styling cannot be changed by a web preview alone.
+
+### Calendar design comparison (preview)
+- Five interactive studies under Reminders → calendar → Try five calendar layouts: Paper grid, Soft columns, Month + agenda, Time lanes, Open diary. Shared category colours, month / rolling eight-date week, controlled zoom and sample editing; real data is read only here.
+- Collect Nicole’s choice before replacing the main calendar. Verify two-finger pinch and horizontal scrolling on her Android phone; browser checks cover buttons, slider, dates and layouts.
+- Next native calendar release: include Android CalendarContract event/display/calendar colour fields in sync so Google’s source colours can be retained. The current native payload omits these fields. Preview honours a valid colour when present and otherwise uses its category palette; categorisation is a local display heuristic, not a new AI sync feature.
