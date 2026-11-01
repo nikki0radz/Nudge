@@ -1,29 +1,36 @@
 # Nudge
-A voice-first, Android-ready reminder app. Pink, cream and a little sunshine.
+Voice-first reminders with a pink, cream and pastel yellow interface.
 
-## First edition
-- Tap to dictate, tap again to save; live transcript and animated recording indicator. Browser speech recognition support and microphone permission required. Text and keyboard dictation remain available.
-- Reminders saved without a date form; automatic waking-hour check-ins, common spoken dates/times, deadlines and context labels.
-- Multiple category tags and basic people extraction. Category/search view, completion, restore, edit and delete.
-- Duplicate suggestions with explicit merge or save separately choices.
-- Deadline/older-item resurfacing; “Remind me again” chooses another time.
-- Browser-local persistence, JSON export/merge import, offline app shell.
-- Optional foreground browser notifications. No backend, API keys, analytics or account required.
+## Use
+Open the GitHub Pages app. In **Settings → Your private AI connection**, enter the code matching the Worker’s `APP_TOKEN` secret. Optionally choose **Remember on this device**. The OpenAI key is never entered in the app. Then speak or type; reminders are extracted, tagged and scheduled automatically. Duplicate suggestions let you refresh an existing reminder or save separately. “Remind me again” chooses another moment without a date form.
 
-## Current limits
-The local rule-based parser is deliberately a preview, not OpenAI. Unsupported/ambiguous timing is retained and marked for a contextual check-in. It does not monitor meetings, shops, calendar or location, and does not create recurring schedules. Browser speech services may process audio remotely; raw recordings are not retained. If recognition is unavailable, use text/keyboard dictation.
+The home screen shows three reminders, giving priority to deadlines and older tasks. The Reminders tab has search and multiple category/person tags. Completion, restoring, edits, JSON export and merge-import are supported. Example reminders are optional and clearly marked.
 
-Web timers cannot deliver reliable reminders while the app is closed. Android native local notifications and notification action buttons will be added during packaging. Notification permission is opt-in. Records currently exist only in the browser/device that saved them. Export before migration.
+## Cloudflare
+- Worker: `nudge-api`, GitHub root `/`, no build command, deploy `npx wrangler deploy`.
+- Required **runtime Secrets**: `OPENAI_API_KEY`, `APP_TOKEN`.
+- Optional runtime Text: `ALLOWED_ORIGIN` (default `https://nikki0radz.github.io`), `OPENAI_MODEL` (default `gpt-4.1-mini`), `TRANSCRIPTION_MODEL` (default `gpt-transcribe`).
+- GitHub Pages continues to host the frontend. The API URL is fixed to `https://nudge-api.nikki0radz.workers.dev` in `ai-client.js`.
+- `/health` is public and returns deployment status only. `/api/connect`, `/api/interpret`, `/api/transcribe` require `Authorization: Bearer <APP_TOKEN>`. Missing configuration fails closed. CORS is additional browser policy, not authentication.
+- `/api/connect` checks the code and required secret presence without a billable model call. Actual model/key access is checked by the first real request.
+- Interpretation uses the Responses API with strict structured output, `store:false`, bounded input/output, validated dates, existing-ID validation and a fixed instruction boundary. Transcript/text are sent only for explicitly initiated processing. Server logs do not include them or credentials.
 
-## Next: Cloudflare + OpenAI
-Keep all API keys in Worker secrets, never client code. Add authenticated `/api/transcribe` (audio) and `/api/interpret` (text + timezone + existing reminder summaries), structured schema validation and persistent D1 records. OpenAI interprets intent, extracts people/categories, separates multiple tasks, and proposes duplicate matches. The app validates dates and schedules notification delivery deterministically. Model output must not perform unrestricted actions. Native Android scheduling remains independent of model availability. Add a Capacitor shell, native recording, local notifications, actions (Done / Remind me again), and boot rescheduling. Cloud sync should preserve IDs and original text. Spoken times take precedence; otherwise use waking hours, deadline lead time and paced follow-up, rather than unconstrained randomness.
+## Voice and recovery
+Connected voice capture uses MediaRecorder, capped at five minutes, with microphone permission, visible stop/record states and animated waves. The recording is stored locally in IndexedDB before upload, allowing retry/download after failure or reload. Typed thoughts/transcripts are kept as local drafts while processing. After transcription the draft replaces the audio recovery copy. Successfully saved reminders clear the draft. An explicit **Save without AI** fallback uses basic local parsing. Recovery recordings can be removed with confirmation.
 
-## Development
-Static build: no dependencies required. Serve the repository root over HTTPS (or localhost) for mic and service worker support. Files at root also work with GitHub Pages branch deployment. `node tests/engine.test.cjs` verifies core scheduling and duplicate behavior.
+The private code is stored in sessionStorage, or localStorage only when remembering the device is chosen. It is excluded from reminder backups. Browser-local storage is not encrypted cloud sync. Do not use shared devices with the remember option. Saved reminders remain available after disconnecting AI.
 
-## Cloudflare deployment foundation
-Import this repository as a Cloudflare Worker named `nudge-api`, root `/`, no build command, deploy command `npx wrangler deploy`. `wrangler.jsonc` selects `worker.mjs`; the frontend continues to be hosted by GitHub Pages. Pushes to the connected branch can deploy the Worker automatically.
+## Limits and next steps
+Reminders remain local to this browser/device; export before clearing storage or moving into Android. Browser notifications work only while open and supported; Android native local notifications/actions are still needed for reliable closed-app reminders. There is no calendar/location integration or meeting detection. Contextual requests and recurring schedules remain tagged context with a check-in; the app does not claim to monitor them. “Remind me again” and resurfacing use local logic, not another AI call.
 
-Visit `/health` to verify the service. This foundation does not call OpenAI, expose secrets, store reminders or provide authentication. A successful health check confirms deployment only. Add `OPENAI_API_KEY` as a Cloudflare runtime Secret when ready; `ALLOWED_ORIGIN` may be set to `https://nikki0radz.github.io` (the default). AI endpoints and app integration come next, with authentication before enabling billable operations. CORS is not authentication.
+Next: Capacitor Android packaging, native notifications and recording, persistent sync if desired. Keep notification scheduling deterministic and independent of model availability.
 
-Run `node tests/worker.test.mjs` for Worker checks, alongside the engine tests.
+## Validation
+No frontend build/dependency install is required. Run:
+```
+node --check app.js
+node tests/engine.test.cjs
+node tests/worker.test.mjs
+node tests/client.test.cjs
+```
+Worker tests mock OpenAI; a live authenticated voice/text request requires entering the private code in the app. Tests must not use real secrets or user recordings.
