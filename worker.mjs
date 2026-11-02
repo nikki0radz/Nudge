@@ -1,6 +1,7 @@
 import timing from './timing.js';
 import {handleBackup} from './backup-api.mjs';
 import {runAssistant} from './assistant.mjs';
+import {runCalendarTidy} from './calendar-tidy-api.mjs';
 const DEFAULT_ORIGIN = 'https://nikki0radz.github.io';
 const MAX_JSON = 100000;
 const MAX_AUDIO = 20 * 1024 * 1024;
@@ -91,8 +92,8 @@ export default {
       if(origin&&!allowedOrigins.has(origin))return json({error:'Origin not allowed'},403);
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
       const path=new URL(request.url).pathname;
-      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v4-mobile',authenticationRequired:true,backupsConfigured:!!env.BACKUPS});
-      if(!['/api/connect','/api/interpret','/api/transcribe','/api/assistant','/api/backup','/api/backup/latest'].includes(path))return json({error:'Not found'},404);
+      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v4-mobile',authenticationRequired:true,backupsConfigured:!!env.BACKUPS,calendarTidy:true});
+      if(!['/api/calendar-tidy','/api/connect','/api/interpret','/api/transcribe','/api/assistant','/api/backup','/api/backup/latest'].includes(path))return json({error:'Not found'},404);
       if(request.method!=='POST'&&!path.startsWith('/api/backup'))return json({error:'Method not allowed'},405);
       if(!env.APP_TOKEN)return json({error:'Add APP_TOKEN as a runtime Secret in Cloudflare.'},503);
       const bearer=request.headers.get('Authorization')||'';
@@ -100,6 +101,11 @@ export default {
       if(path.startsWith('/api/backup'))return await handleBackup(request,env,json);
       if(!env.OPENAI_API_KEY)return json({error:'Add OPENAI_API_KEY as a runtime Secret in Cloudflare.'},503);
       if(path==='/api/connect')return json({connected:true,service:'nudge-api',model:env.OPENAI_MODEL||'gpt-4.1-mini'});
+      if(path==='/api/calendar-tidy'){
+        if(!request.headers.get('Content-Type')?.includes('application/json'))throw new ApiError('Expected calendar groups.');
+        const bytes=await limitedBody(request,MAX_JSON);let input;try{input=JSON.parse(new TextDecoder().decode(bytes));}catch{throw new ApiError('The calendar groups could not be read.');}
+        return json(await runCalendarTidy(input,env,{openai,ApiError}));
+      }
       if(path==='/api/interpret'||path==='/api/assistant'){
         if(!request.headers.get('Content-Type')?.includes('application/json'))throw new ApiError('Expected a JSON reminder.');
         const bytes=await limitedBody(request,path==='/api/assistant'?3800000:MAX_JSON);let input;try{input=JSON.parse(new TextDecoder().decode(bytes));}catch{throw new ApiError('The reminder request could not be read.');}

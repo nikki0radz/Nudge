@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.5
+# Nudge for Android · 0.1.6
 
-Download `downloads/nudge-0.1.5.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.6.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -41,3 +41,15 @@ The logo and calendar-window design studies remain separate for review; no unsel
 ## Appearance and notebook calendar · 0.1.5
 
 Settings → Appearance offers Light, Dark and Use device setting. The choice persists and is included with app settings in backups. Device mode follows changes to the phone theme. Dark mode covers the app surfaces, notes, calendar, controls and dialog windows, with matching native system bars. Images retain their original colours. The in-app event editor now uses the selected notebook design with a date badge, sticker and lined notes. Source calendar titles and times remain read-only. New logo options are awaiting selection.
+
+## Calendar labels, archive and a warmer Today · 0.1.6
+
+Today has an owl beside its coloured headline. The settings button uses a generated transparent flower-cog PNG. Six event stickers cover fireworks, New Year, graduation, deadlines, balloons and music.
+
+Calendar → Tidy up calendar reviews repeated titles and birthday patterns, showing counts for the events currently imported. Choose a category and sticker, then Keep this label. The rule applies to past imported matches and future imports inside Nudge. Individual event edits take priority. Google Calendar stays read-only; source events are never changed. Remove a remembered rule under Calendar options, or Undo the last label change from the tidy-up dialog. Approved rules merge into local and encrypted backups, including removal timestamps.
+
+Daily pattern checks run while Nudge is open, at most once per local day. Only new ambiguous title groups use the private AI connection; obvious birthday/work/deadline patterns are detected locally. AI suggestions are cached, and no label is applied until approved. This is not an Android background scheduler, so it cannot promise analysis while the app is closed. Switch daily checks off in Calendar options. Calendar write permission is not requested.
+
+Swipe right for the next month and left for the previous month; zoomed calendars still pan within the month. The legend is inside Calendar options. Today's smaller centred date badge sits on a highlighted tile.
+
+People important dates before today appear in a collapsed Archive folder. Nothing is deleted or copied: editing the date into the future restores the active view. The note editor now provides an optional date and annual-repeat setting. Recognisable older ISO/UK dates are supported; undated or ambiguous notes stay active. Annual dates stay in Important dates. Folder headings have no counts.
