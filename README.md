@@ -58,3 +58,5 @@ Version 0.1.6 adds approved Nudge-only calendar label rules, cached AI suggestio
 Version 0.1.8 adds visual PNG pickers, local custom calendar labels and per-pattern sticker editing. Custom labels are validated and backed up; calendar AI may suggest only supplied category IDs.
 
 Version 0.1.9 adds Soft mauve dark mode, a colour wheel, durable calendar label preferences and unfinished choices, create-and-apply labels, an explicit calendar recheck and ten new PNG stickers.
+
+Version 0.1.10 adds all fifty approved app-style occasion stickers as individual transparent PNGs across event details, custom labels and calendar cleanup. Existing stickers and label assignments are preserved.

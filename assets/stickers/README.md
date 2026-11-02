@@ -24,3 +24,58 @@ Use case: stylized-concept. Asset type: one small transparent PNG sticker for th
 The calendar PNG is embedded into the signed preview for offline use. Settings → Little occasion stickers previews the bank at large and small sizes; the remaining gallery images load online. The source files can be bundled directly in the next native release.
 
 The Android bundle and downloadable ZIP use 256px display copies to keep app updates small. Original generated PNGs above are retained unchanged.
+
+## Approved 50-sticker collection · 0.1.10
+
+Each sticker was individually generated from its approved numbered sheet using the built-in image tool, preserving simple pastel silhouettes, thick dusty rose contours and cream highlights. Every file has its own transparent canvas; no CSS sprite slicing is used. Existing sticker identifiers remain unchanged.
+
+1. `friends-hug.png` — Friends hug
+2. `friends-group.png` — Friends together
+3. `coffee-takeaway.png` — Takeaway coffee
+4. `coffee-latte.png` — Latte
+5. `coffee-catchup.png` — Coffee catch-up
+6. `wine-cheers.png` — Wine cheers
+7. `wine-night.png` — Wine night
+8. `cocktail-martini.png` — Martini
+9. `cocktail-mojito.png` — Mojito
+10. `tea-time.png` — Tea time
+11. `board-games.png` — Board games
+12. `playing-cards.png` — Playing cards
+13. `disco-ball.png` — Disco
+14. `dancing-heels.png` — Dancing
+15. `karaoke.png` — Karaoke
+16. `cinema-night.png` — Cinema
+17. `concert-tickets.png` — Concert tickets
+18. `gaming.png` — Gaming
+19. `bowling.png` — Bowling
+20. `picnic.png` — Picnic
+21. `love-hearts.png` — Love hearts
+22. `heart-lock.png` — Heart lock
+23. `love-letter.png` — Love letter
+24. `finger-hearts.png` — Finger hearts
+25. `anniversary-hearts.png` — Anniversary hearts
+26. `tulips.png` — Tulips
+27. `heart-hug.png` — Heart hug
+28. `holding-hands.png` — Holding hands
+29. `chocolates.png` — Chocolates
+30. `sunshine-love.png` — A little sunshine
+31. `fern.png` — Fern
+32. `woodland.png` — Woodland
+33. `wildflowers.png` — Wildflowers
+34. `hiking.png` — Hiking
+35. `camping.png` — Camping
+36. `beach-day.png` — Beach day
+37. `travel-suitcase.png` — Suitcase
+38. `train-trip.png` — Train trip
+39. `gardening.png` — Gardening
+40. `ski-holiday.png` — Ski holiday
+41. `shopping.png` — Shopping
+42. `groceries.png` — Groceries
+43. `present.png` — Present
+44. `newyear-cheers.png` — New Year cheers
+45. `pumpkin.png` — Halloween pumpkin
+46. `christmas-wreath.png` — Christmas wreath
+47. `graduation-books.png` — Graduation books
+48. `spa-day.png` — Spa day
+49. `pet-love.png` — Pet love
+50. `new-home.png` — New home

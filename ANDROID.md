@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.9
+# Nudge for Android · 0.1.10
 
-Download `downloads/nudge-0.1.9.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.10.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -73,3 +73,7 @@ Seven additional PNGs cover anniversaries, Halloween, bonfire night, Valentine's
 Soft mauve dark mode uses a dark purple base with warm light text. Custom labels use a hue/saturation wheel, depth slider and optional hex entry. The label creator has no disclosure triangle. Ten more transparent PNG stickers cover friends, cleaning, surgery, plants, love, vets and birthdays.
 
 Label definitions, matching rules and unfinished cleanup choices have a separate recovery record on the same device. Creating a label from a pattern applies it immediately; Save these labels saves the remaining selections together. Go over calendar again rechecks pending or skipped patterns and opens remembered rules for category/sticker editing. Existing approved rules are preserved; source calendars remain read-only.
+
+## Fifty approved stickers · 0.1.10
+
+Adds the full approved 1–50 collection in the simpler app style. Each is an independent transparent PNG, available in event details, custom label defaults and per-pattern calendar tidy-up rules. The same keys are accepted in backup validation and AI cleanup suggestions. Existing assets and saved assignments keep their original identifiers. Android bundles display-sized copies for offline use.
