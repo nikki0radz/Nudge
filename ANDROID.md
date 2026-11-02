@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.7
+# Nudge for Android · 0.1.8
 
-Download `downloads/nudge-0.1.7.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.8.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -57,3 +57,13 @@ People important dates before today appear in a collapsed Archive folder. Nothin
 ## Selected stationery logo · 0.1.7
 
 The selected cream note, yellow pencil and pink tick PNG is used for the header, favicon and web app icons. Android uses the same artwork as an adaptive launcher icon on a blush background, with a matching monochrome note-and-pencil notification symbol. The original selected PNG is retained unchanged. Olive remains on Today and in completion notes. Package, signer and storage origin are unchanged.
+
+## Visual stickers and custom labels · 0.1.8
+
+Tidy-up now sits below Calendar options. Sticker choices show PNG previews in a collapsible picture grid, including the selected sticker. The same picker is used in event editing, pattern review and custom label creation.
+
+Choose Create your own label in an event or tidy-up card, or in Calendar options. Give the label a name, colour and optional default sticker. It becomes selectable immediately without clearing unsaved event notes. Labels are included in local exports and encrypted backups; IDs and approved rules are preserved on merge. AI can suggest only existing custom labels supplied with the request, with approval still required.
+
+Each remembered title rule keeps its own PNG, independently of its category. Two jobs can both be Work and use different stickers. Use Calendar options → Remembered labels → Edit, or open Your remembered labels inside tidy-up, to change an existing rule. Individual event sticker edits, including None, take priority over rule/default stickers. Source Google events remain read-only.
+
+Seven additional PNGs cover anniversaries, Halloween, bonfire night, Valentine's day, therapy, care work and desk work. Today uses the original full-body Olive on a transparent background, without the pink bubble.

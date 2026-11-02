@@ -54,3 +54,5 @@ People profiles have a direct Add/Change photo control, Choose photo and Take ph
 See [ANDROID.md](ANDROID.md) for the installable APK, preserving existing Friend Dossier data, synced phone/Google calendars, private R2 setup, recovery and signed app updates. The optional backup deploy configuration is `wrangler.backups.jsonc`; it reuses the existing private `unscripted-backups` bucket with Nudge-specific object keys.
 
 Version 0.1.6 adds approved Nudge-only calendar label rules, cached AI suggestions with optional daily checks while open, swipe navigation, a date-based People archive and new stationery PNGs. `/api/calendar-tidy` uses the existing app authentication and private AI key; it returns reviewable suggestions and never accesses the calendar provider.
+
+Version 0.1.8 adds visual PNG pickers, local custom calendar labels and per-pattern sticker editing. Custom labels are validated and backed up; calendar AI may suggest only supplied category IDs.

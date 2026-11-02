@@ -92,7 +92,7 @@ export default {
       if(origin&&!allowedOrigins.has(origin))return json({error:'Origin not allowed'},403);
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
       const path=new URL(request.url).pathname;
-      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v4-mobile',authenticationRequired:true,backupsConfigured:!!env.BACKUPS,calendarTidy:true});
+      if(request.method==='GET'&&['/','/health','/api/health'].includes(path))return json({service:'nudge-api',status:'ok',stage:'ai-v4-mobile',authenticationRequired:true,backupsConfigured:!!env.BACKUPS,calendarTidy:true,calendarCustomLabels:true});
       if(!['/api/calendar-tidy','/api/connect','/api/interpret','/api/transcribe','/api/assistant','/api/backup','/api/backup/latest'].includes(path))return json({error:'Not found'},404);
       if(request.method!=='POST'&&!path.startsWith('/api/backup'))return json({error:'Method not allowed'},405);
       if(!env.APP_TOKEN)return json({error:'Add APP_TOKEN as a runtime Secret in Cloudflare.'},503);
