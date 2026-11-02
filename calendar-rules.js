@@ -1,7 +1,7 @@
 /* Nudge-only labels. These rules never write into the calendar provider. */
 (function(root){
 const categories=['birthday','urgent','work','appointment','plan','personal','social','travel','study'];
-const stickers=['calendar','birthday','gift','holiday','hair','waxing','nails','work','concert','festival','party','appointment','fireworks','newyear','graduation','deadline','celebration','music','anniversary','halloween','bonfire','valentines','therapy','work-care','work-desk'];
+const stickers=['calendar','birthday','gift','holiday','hair','waxing','nails','work','concert','festival','party','appointment','fireworks','newyear','graduation','deadline','celebration','music','anniversary','halloween','bonfire','valentines','therapy','work-care','work-desk','friends','friendship','housework','laundry','surgery','plants','love-key','love-flowers','vet','birthday-candles'];
 const key=value=>String(value||'').normalize('NFKC').trim().toLocaleLowerCase().replace(/[’‘]/g,"'").replace(/\s+/g,' ').replace(/[.!]+$/,'');
 const customId=id=>typeof id==='string'&&/^custom-[a-z0-9-]{1,80}$/.test(id);
 const validCategory=id=>categories.includes(id)||customId(id);

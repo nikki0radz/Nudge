@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.8
+# Nudge for Android · 0.1.9
 
-Download `downloads/nudge-0.1.8.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.9.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -67,3 +67,9 @@ Choose Create your own label in an event or tidy-up card, or in Calendar options
 Each remembered title rule keeps its own PNG, independently of its category. Two jobs can both be Work and use different stickers. Use Calendar options → Remembered labels → Edit, or open Your remembered labels inside tidy-up, to change an existing rule. Individual event sticker edits, including None, take priority over rule/default stickers. Source Google events remain read-only.
 
 Seven additional PNGs cover anniversaries, Halloween, bonfire night, Valentine's day, therapy, care work and desk work. Today uses the original full-body Olive on a transparent background, without the pink bubble.
+
+## Soft mauve and calendar preferences · 0.1.9
+
+Soft mauve dark mode uses a dark purple base with warm light text. Custom labels use a hue/saturation wheel, depth slider and optional hex entry. The label creator has no disclosure triangle. Ten more transparent PNG stickers cover friends, cleaning, surgery, plants, love, vets and birthdays.
+
+Label definitions, matching rules and unfinished cleanup choices have a separate recovery record on the same device. Creating a label from a pattern applies it immediately; Save these labels saves the remaining selections together. Go over calendar again rechecks pending or skipped patterns and opens remembered rules for category/sticker editing. Existing approved rules are preserved; source calendars remain read-only.

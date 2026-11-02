@@ -56,3 +56,5 @@ See [ANDROID.md](ANDROID.md) for the installable APK, preserving existing Friend
 Version 0.1.6 adds approved Nudge-only calendar label rules, cached AI suggestions with optional daily checks while open, swipe navigation, a date-based People archive and new stationery PNGs. `/api/calendar-tidy` uses the existing app authentication and private AI key; it returns reviewable suggestions and never accesses the calendar provider.
 
 Version 0.1.8 adds visual PNG pickers, local custom calendar labels and per-pattern sticker editing. Custom labels are validated and backed up; calendar AI may suggest only supplied category IDs.
+
+Version 0.1.9 adds Soft mauve dark mode, a colour wheel, durable calendar label preferences and unfinished choices, create-and-apply labels, an explicit calendar recheck and ten new PNG stickers.

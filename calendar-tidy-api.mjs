@@ -1,5 +1,5 @@
 const categories=['','birthday','urgent','work','appointment','plan','personal','social','travel','study'];
-const stickers=['','calendar','birthday','gift','holiday','hair','waxing','nails','work','concert','festival','party','appointment','fireworks','newyear','graduation','deadline','celebration','music','anniversary','halloween','bonfire','valentines','therapy','work-care','work-desk'];
+const stickers=['','calendar','birthday','gift','holiday','hair','waxing','nails','work','concert','festival','party','appointment','fireworks','newyear','graduation','deadline','celebration','music','anniversary','halloween','bonfire','valentines','therapy','work-care','work-desk','friends','friendship','housework','laundry','surgery','plants','love-key','love-flowers','vet','birthday-candles'];
 export async function runCalendarTidy(value,env,{openai,ApiError}){
  if(!Array.isArray(value?.groups)||value.groups.length>80)throw new ApiError('Please tidy up to 80 groups at a time.');
  const labels=(Array.isArray(value.labels)?value.labels:[]).slice(0,200).filter(l=>l&&typeof l.id==='string'&&/^custom-[a-z0-9-]{1,80}$/.test(l.id)&&typeof l.name==='string'&&l.name.trim()).map(l=>({id:l.id,name:l.name.trim().slice(0,40)}));const allowedCategories=[...categories,...labels.map(l=>l.id)];

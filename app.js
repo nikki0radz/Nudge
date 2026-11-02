@@ -8,10 +8,12 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const KEY='nudge.v1';let state;try{state=JSON.parse(localStorage.getItem(KEY));}catch{}state=state&&Array.isArray(state.tasks)?state:{tasks:[],settings:{start:'09:00',end:'20:00',pace:'balanced'}};state.settings||={start:'09:00',end:'20:00',pace:'balanced'};
 state.settings.appearance=window.NudgeTheme.apply(state.settings.appearance||window.NudgeTheme.mode);
 state.events=Array.isArray(state.events)?state.events:[];state.deviceEvents=Array.isArray(state.deviceEvents)?state.deviceEvents:[];state.people=[];state.inbox=[];state.conversation=Array.isArray(state.conversation)?state.conversation.slice(-6):[];
+NudgeCalendarPreferences.restore(state,localStorage);
 let processing=false;
 let page='home',filter='All',query='',listMode='active',recording=false,recognizer=null,transcript='',stopRequested=false,pendingDuplicate=null,toastTimer;
 const main=document.querySelector('#main'),detail=document.querySelector('#detail');
-function save(){try{localStorage.setItem(KEY,JSON.stringify((({people,inbox,importedDossier,...snapshot})=>snapshot)(state)));if(window.NudgeBackups)NudgeBackups.schedule();if(window.NativeBridge)NativeBridge.scheduleReminders();return true;}catch{toast('Storage is full or unavailable. Keep this page open and export a backup.');return false;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify((({people,inbox,importedDossier,...snapshot})=>snapshot)(state)));}catch{toast('Storage is full or unavailable. Keep this page open and export a backup.');return false;}NudgeCalendarPreferences.persist(state,localStorage);try{if(window.NudgeBackups)NudgeBackups.schedule();}catch{}try{if(window.NativeBridge)NativeBridge.scheduleReminders();}catch{}return true;}
+
 function toast(msg){const el=document.querySelector('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),5500);}
 function date(t){return new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(t));}
 function age(t){let days=Math.floor((Date.now()-t)/86400000);return days===0?'Added today':days===1?'Added yesterday':`Added ${days} days ago`;}
