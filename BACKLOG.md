@@ -68,3 +68,18 @@ Status: visual samples are in preview; live date processing is requested for the
 - Nicole selected Picture window as the preferred header shape. Five variations now retain that structure with taller, more square photos: Linen script, Sky handwriting, Clay signature, Pearl portrait and Sea-glass note. Neutral, clay and grey-teal frames distinguish the header from the category folders and lilac reminders.
 - Each variation uses the existing offline PNG owl perched above the frame, with different placements and name alignment/font choices. Handwriting/calligraphy font subsets are bundled in signed CSS; see FONT-LICENSES.md. No photo or saved name changes are needed.
 - Try a longer name toggles a fictional name in the design preview only; Keep this header persists the chosen style for real profiles without changing their names or photos.
+
+## Magnolia calendar and Little album variations
+
+- The selected-day calendar panel uses warm magnolia/cream-yellow paper, with event category colours retained inside the rows.
+- Little album is the selected People directory structure. Five three-column variations are now in preview: Cream album, Rose autograph, Sky frames, Peach notes and Mint miniatures. Compare fonts, name sizing and pastel frames using real or isolated sample people.
+- A matching transparent PNG occasion-sticker bank is being added; use recognisable, simple silhouettes at small sizes and preserve original generated PNGs for future event types.
+
+- Latest profile choice: 1, Linen script. Remove the owl from profile headers and the extra perch spacing; retain Olive elsewhere in Nudge. Everyone navigation is a compact button close to the profile frame.
+
+## Stable release 0.1.3
+
+- Approved preview UI promoted to stable: Linen script profiles without perched owl, compact Everyone navigation, magnolia selected day, approved compact capture/reminder layouts and soft menus.
+- All 12 PNG occasion stickers are available in Settings and bundled offline; calendar button uses the new calendar sticker. Original PNGs and ZIP are retained.
+- Native Preview controls now use sentence case. Installing this stable release leaves any older cached preview and opens the new stable UI; notes and settings are preserved.
+- Functional backlog items above (live People dates/archive, AI profile verification, activity history, task completion rewards and device calendar colour sync) remain pending.

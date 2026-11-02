@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.2
+# Nudge for Android · 0.1.3
 
-Download `downloads/nudge-0.1.2.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.3.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
