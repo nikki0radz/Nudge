@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.4
+# Nudge for Android · 0.1.5
 
-Download `downloads/nudge-0.1.4.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.5.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -32,8 +32,12 @@ The APK contains the trusted offline UI. It checks the public `update.json` mani
 
 Build with Java 17, Android API 35, and Android build tools. Set `NUDGE_ANDROID_SDK` to a directory containing `android-35/android.jar` and build tools in `android-15/` (or adapt the script paths). Set `NUDGE_KEYSTORE`, `NUDGE_STORE_PASSWORD`, then run `bash scripts/build-android.sh`. An Eclipse JDT compiler jar can be selected via `NUDGE_ECJ_JAR` if javac is absent. Increment manifest versionCode and versionName, build/verify the APK with the original signer, and update `update.json` plus the hosted download together. No app access code, OpenAI key, personal notes or signing secrets belong in the public APK/source.
 
-## Normal app release · 0.1.4
+## Normal app release · 0.1.5
 
 The approved compact layouts, People notes, filing animation, rotating Owl notes and Undo are now bundled. Design pickers, sample controls and the native preview bar are removed. Only reminders explicitly marked as examples are removed; real reminders and existing app storage are preserved. Upgrading disables any older cached preview so the bundled release opens normally.
 
 The logo and calendar-window design studies remain separate for review; no unselected new logo is installed. Phone calendar access remains read-only: edits to source titles, dates and times still belong in the source calendar, while Nudge categories, stickers and notes are editable in this app.
+
+## Appearance and notebook calendar · 0.1.5
+
+Settings → Appearance offers Light, Dark and Use device setting. The choice persists and is included with app settings in backups. Device mode follows changes to the phone theme. Dark mode covers the app surfaces, notes, calendar, controls and dialog windows, with matching native system bars. Images retain their original colours. The in-app event editor now uses the selected notebook design with a date badge, sticker and lined notes. Source calendar titles and times remain read-only. New logo options are awaiting selection.

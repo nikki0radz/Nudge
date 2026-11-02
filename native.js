@@ -9,7 +9,7 @@ window.NativeBridge=(()=>{
  function scheduleReminders(){if(!available()||!state?.tasks)return;call('scheduleReminders',{tasks:state.tasks.filter(t=>!t.done).map(t=>({id:t.id,title:t.title,next:t.next,deadline:t.deadline})),settings:state.settings}).catch(()=>{});}
  async function notifications(){try{await call('notificationPermission');scheduleReminders();toast('Phone reminders enabled.');}catch(e){toast(e.message);}}
  async function consume(){try{const data=await call('resume');for(const action of data.actions||[]){const t=state.tasks.find(t=>t.id===action.id);if(!t)continue;if(action.type==='done')t.done=true;else if(action.type==='snooze'){t.next=action.next;delete t.notified;}}if(data.events)state.deviceEvents=data.events;save();if(!recording&&!processing&&!voiceStarting&&!previewBusy)render();}catch{}}
- async function init(){if(!available())return;await consume();scheduleReminders();checkUpdates();}
+ async function init(){if(!available())return;window.NudgeTheme?.apply(state.settings.appearance||'system');await consume();scheduleReminders();checkUpdates();}
  function exportBackup(){return call('exportBackup',{json:JSON.stringify({version:2,...state},null,2)}).catch(e=>toast(e.message));}
  window.addEventListener('nudge:resume',consume);return {available,call,resolve,syncCalendars,checkUpdates,scheduleReminders,notifications,init,exportBackup};
 })();
