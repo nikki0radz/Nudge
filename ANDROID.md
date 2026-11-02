@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.3
+# Nudge for Android · 0.1.4
 
-Download `downloads/nudge-0.1.3.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.4.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -10,7 +10,7 @@ Enter the same private app access code in Android Settings → Your private AI c
 
 ## Google Calendar and reminders
 
-Settings → Calendars & app updates → Connect phone calendars requests calendar read permission. Select the Google calendars already synced to Android. Nudge refreshes them on app resume, displays six months of past events and roughly thirteen months ahead, and includes relevant calendar context in AI requests. Connect Google account calendar sync in Android first if nothing appears. Local Nudge events are editable inside Nudge; synced Google events open in the phone’s calendar app for changes. Local Nudge events are not written back into Google Calendar.
+Settings → Calendars & app updates → Connect phone calendars requests calendar read permission. Select the Google calendars already synced to Android. Nudge refreshes them on app resume, displays six months of past events and roughly thirteen months ahead, and includes relevant calendar context in AI requests. Connect Google account calendar sync in Android first if nothing appears. Linked events open inside Nudge, where you can add a category colour, sticker and notes for AI context. Their source title and time remain read-only and refresh from the phone calendar. Nudge details are kept separately through refresh and included in local and encrypted backups. Local Nudge events are fully editable inside Nudge. Local Nudge events are not written back into Google Calendar.
 
 Settings → Notifications enables native reminders with Done and Remind me again actions. Android may delay alarms when exact alarms are unavailable or under battery restrictions. This first build has been compiled and signature-verified, but needs a real-phone check for microphone, calendar provider, photo capture, notification delivery, and device-specific battery behaviour.
 
@@ -32,12 +32,8 @@ The APK contains the trusted offline UI. It checks the public `update.json` mani
 
 Build with Java 17, Android API 35, and Android build tools. Set `NUDGE_ANDROID_SDK` to a directory containing `android-35/android.jar` and build tools in `android-15/` (or adapt the script paths). Set `NUDGE_KEYSTORE`, `NUDGE_STORE_PASSWORD`, then run `bash scripts/build-android.sh`. An Eclipse JDT compiler jar can be selected via `NUDGE_ECJ_JAR` if javac is absent. Increment manifest versionCode and versionName, build/verify the APK with the original signer, and update `update.json` plus the hosted download together. No app access code, OpenAI key, personal notes or signing secrets belong in the public APK/source.
 
-## In-app visual previews · 0.1.2+
+## Normal app release · 0.1.4
 
-Settings → Preview upcoming changes → switch on. Nudge downloads the current signed web UI snapshot, checks its file hashes and compatibility, and reloads under the same local origin. Existing people, photos, reminders, settings and app access code stay in place. Preview mode is off by default, remains on across restarts, and caches its last successful version for offline use.
+The approved compact layouts, People notes, filing animation, rotating Owl notes and Undo are now bundled. Design pickers, sample controls and the native preview bar are removed. Only reminders explicitly marked as examples are removed; real reminders and existing app storage are preserved. Upgrading disables any older cached preview so the bundled release opens normally.
 
-Use Refresh preview after a new visual round is published. The native pink Preview bar also offers Refresh and Back to stable, even if the preview UI itself breaks. Back to stable loads the UI bundled with the installed APK; it does not delete or restore your notes. Finish recording/saving before changing versions. Previews use your actual local notes, so completed tasks and saved edits remain after switching back. Only backwards-compatible UI changes belong in this channel; schema migrations, new native permissions, and native APIs require an APK release.
-
-For visual-only feedback rounds: edit the files in `preview/`, run `python3 scripts/publish-preview.py --source preview` with the original signing keystore/password supplied via the environment, then commit **only `preview/`**. Do not update the APK or `update.json`. The stable UI stays bundled in Android. The publisher signs the manifest with the APK signing key (RSA/SHA-256 with a domain-separated payload); Android verifies it against its own signing certificate before accepting a fixed allowlist of files. A corrupt/incompatible/offline update leaves the current UI unchanged. The app never navigates the native bridge to a remote page or accepts a custom preview URL.
-
-When a batch is approved, copy the approved UI into a signed APK release and bump its version as normal. Keep the preview minimumNativeVersion in sync with any future native API requirements. The initial preview matches the current layout; later design iterations are published to the same channel.
+The logo and calendar-window design studies remain separate for review; no unselected new logo is installed. Phone calendar access remains read-only: edits to source titles, dates and times still belong in the source calendar, while Nudge categories, stickers and notes are editable in this app.

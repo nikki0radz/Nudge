@@ -4,7 +4,7 @@ Voice-first reminders with a pink, cream and pastel yellow interface.
 ## Use
 Open the GitHub Pages app. In **Settings → Your private AI connection**, enter the code matching the Worker’s `APP_TOKEN` secret. Optionally choose **Remember on this device**. The OpenAI key is never entered in the app. Then speak or type; reminders are extracted, tagged and scheduled automatically. Duplicate suggestions let you refresh an existing reminder or save separately. “Remind me again” chooses another moment without a date form.
 
-The home screen shows three reminders, giving priority to deadlines and older tasks. The Reminders tab has search and multiple category/person tags. Completion, restoring, edits, JSON export and merge-import are supported. Example reminders are optional and clearly marked.
+The home screen shows three reminders, giving priority to deadlines and older tasks. The Reminders tab has search and multiple category/person tags. Completion, restoring, edits, JSON export and merge-import are supported. Design examples and preview controls are removed in 0.1.4. Linked calendar events open in Nudge with category colours, stickers and AI-readable notes.
 
 ## Cloudflare
 - Worker: `nudge-api`, GitHub root `/`, no build command, deploy `npx wrangler deploy`.
