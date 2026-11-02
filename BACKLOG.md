@@ -48,3 +48,9 @@ Status: visual samples are in preview; live date processing is requested for the
 - Remove the Last saved card from Today (done in preview); preserve saved data and the immediate save/edit confirmation.
 - Future Reminders tab History button: a small chronological text list grouped by day, with short descriptions such as Added a gift idea for a person or Set a reminder. Truncate long content, avoid individual cards, and link to the relevant item where it still exists. Store actual save events reliably across typed/voice/photo capture, edits and imports before presenting it as a complete history; do not infer an inaccurate audit trail from current entries alone.
 - Approved capture layout: 2, Little folder, with a larger full-width microphone and What’s next on your list? above the folder. Approved thought category menu: 1, Folder dropdown; its chevron now uses a centred vector icon rather than a text glyph.
+
+## Larger portraits and consistent menus
+
+- Replace the compact portrait studies with five larger portrait-led designs: Portrait first, Soft centrepiece, Picture window, Keepsake portrait and Petal arch. Use actual saved photos; selections persist separately from the previous small-header options.
+- Calendar uses a back arrow instead of Today/List view buttons; Month/Next week remain the actual calendar views.
+- All HTML single-select controls now use a shared soft inline dropdown, including calendar filtering, birthday month, person selection, reminder editing and Settings. Preserve original form values and change handlers, disabled options, keyboard selection and Escape. Category selection keeps its approved folder dropdown. Android-owned permission dialogs, file pickers and calendar-account selection are outside the web preview UI.
