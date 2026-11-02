@@ -54,3 +54,11 @@ Status: visual samples are in preview; live date processing is requested for the
 - Replace the compact portrait studies with five larger portrait-led designs: Portrait first, Soft centrepiece, Picture window, Keepsake portrait and Petal arch. Use actual saved photos; selections persist separately from the previous small-header options.
 - Calendar uses a back arrow instead of Today/List view buttons; Month/Next week remain the actual calendar views.
 - All HTML single-select controls now use a shared soft inline dropdown, including calendar filtering, birthday month, person selection, reminder editing and Settings. Preserve original form values and change handlers, disabled options, keyboard selection and Escape. Category selection keeps its approved folder dropdown. Android-owned permission dialogs, file pickers and calendar-account selection are outside the web preview UI.
+
+## AI-created people awaiting verification
+
+- When a capture clearly mentions a new person, allow AI to create and link a profile automatically, including relationship names such as Owen’s mum. Preserve the exact relationship and link the related person; do not silently merge it into Owen or invent a legal name, birthday or other details. Existing implicit-person creation needs review for coverage and ambiguity.
+- Mark newly AI-created profiles as unverified. Give them a subtle highlight and a Verify person prompt when opened, with editable name, relationship, birthday/photo and a clear confirmation action. Avoid duplicate profiles using aliases/relationship identity, and allow merge/correction. Remind gently later without turning every capture into another form.
+- People directory should show photos and names only; five compact styles are in preview. Keep sample directory entries isolated from saved data.
+- Latest home preference: upcoming birthdays should appear within 30 days. Other events previously used seven days; retain separate windows when implementing live countdowns, with profile countdowns at 30 days.
+- Saved-note titles stay prominent; separate descriptions and date details are now smaller and bracketed in preview. Main text without a separate title remains full-sized.
