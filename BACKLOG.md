@@ -62,3 +62,9 @@ Status: visual samples are in preview; live date processing is requested for the
 - People directory should show photos and names only; five compact styles are in preview. Keep sample directory entries isolated from saved data.
 - Latest home preference: upcoming birthdays should appear within 30 days. Other events previously used seven days; retain separate windows when implementing live countdowns, with profile countdowns at 30 days.
 - Saved-note titles stay prominent; separate descriptions and date details are now smaller and bracketed in preview. Main text without a separate title remains full-sized.
+
+## Picture window variations
+
+- Nicole selected Picture window as the preferred header shape. Five variations now retain that structure with taller, more square photos: Linen script, Sky handwriting, Clay signature, Pearl portrait and Sea-glass note. Neutral, clay and grey-teal frames distinguish the header from the category folders and lilac reminders.
+- Each variation uses the existing offline PNG owl perched above the frame, with different placements and name alignment/font choices. Handwriting/calligraphy font subsets are bundled in signed CSS; see FONT-LICENSES.md. No photo or saved name changes are needed.
+- Try a longer name toggles a fictional name in the design preview only; Keep this header persists the chosen style for real profiles without changing their names or photos.
