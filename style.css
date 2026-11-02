@@ -349,3 +349,5 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 :root[data-theme=dark] .cal-event{background:color-mix(in srgb,var(--event-ink) 16%,var(--cream))!important;color:var(--ink)!important}:root[data-theme=dark] .cal-event-dot{background:color-mix(in srgb,var(--event-ink),#fff 40%)}
 :root[data-theme=dark] .cal-category-key{color:var(--ink)}:root[data-theme=dark] dialog::backdrop{background:#0009}:root[data-theme=dark] .event-sync-note,:root[data-theme=dark] .event-ai-note{color:var(--muted)}
 @media(max-width:380px){.event-notebook-heading{gap:10px}.event-header-sticker{width:38px}.event-notebook-title{padding-left:10px}.event-notebook-title h2{font-size:17px}.event-date-badge{min-width:54px}}
+/* Neutral charcoal paper keeps dark mode from acquiring a yellow cast. */
+:root[data-theme=dark]{--cream:#262126;--white:#302a30;--ink:#f2e7ed;--muted:#c7b7c0;--pink:#49333e;--rose:#efb2c3;--yellow:#493e29;--line:#51454e;--tone-fffaf0:#262126;--tone-fffef9:#302a30;--tone-fffaf4:#302a30;--tone-fffaf6:#302a30;--tone-fff9ee:#302a30;--tone-fff9f2:#302a30;--tone-fffdf7:#302a30;--tone-fffdf8:#302a30}
