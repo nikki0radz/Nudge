@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.6
+# Nudge for Android · 0.1.7
 
-Download `downloads/nudge-0.1.6.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.7.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -53,3 +53,7 @@ Daily pattern checks run while Nudge is open, at most once per local day. Only n
 Swipe right for the next month and left for the previous month; zoomed calendars still pan within the month. The legend is inside Calendar options. Today's smaller centred date badge sits on a highlighted tile.
 
 People important dates before today appear in a collapsed Archive folder. Nothing is deleted or copied: editing the date into the future restores the active view. The note editor now provides an optional date and annual-repeat setting. Recognisable older ISO/UK dates are supported; undated or ambiguous notes stay active. Annual dates stay in Important dates. Folder headings have no counts.
+
+## Selected stationery logo · 0.1.7
+
+The selected cream note, yellow pencil and pink tick PNG is used for the header, favicon and web app icons. Android uses the same artwork as an adaptive launcher icon on a blush background, with a matching monochrome note-and-pencil notification symbol. The original selected PNG is retained unchanged. Olive remains on Today and in completion notes. Package, signer and storage origin are unchanged.
