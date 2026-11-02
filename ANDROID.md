@@ -1,6 +1,6 @@
-# Nudge for Android · 0.1.10
+# Nudge for Android · 0.1.11
 
-Download `downloads/nudge-0.1.10.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
+Download `downloads/nudge-0.1.11.apk` on your phone and open it. Android will ask you to allow installation from your browser. Android 8 or newer and an up-to-date Android System WebView are required.
 
 ## Keep your existing notes
 
@@ -50,7 +50,7 @@ Calendar → Tidy up calendar reviews repeated titles and birthday patterns, sho
 
 Daily pattern checks run while Nudge is open, at most once per local day. Only new ambiguous title groups use the private AI connection; obvious birthday/work/deadline patterns are detected locally. AI suggestions are cached, and no label is applied until approved. This is not an Android background scheduler, so it cannot promise analysis while the app is closed. Switch daily checks off in Calendar options. Calendar write permission is not requested.
 
-Swipe right for the next month and left for the previous month; zoomed calendars still pan within the month. The legend is inside Calendar options. Today's smaller centred date badge sits on a highlighted tile.
+Swipe left for the next period and right for the previous period; zoomed calendars still pan within the month. The legend is inside Calendar options. Today's smaller centred date badge sits on a highlighted tile.
 
 People important dates before today appear in a collapsed Archive folder. Nothing is deleted or copied: editing the date into the future restores the active view. The note editor now provides an optional date and annual-repeat setting. Recognisable older ISO/UK dates are supported; undated or ambiguous notes stay active. Annual dates stay in Important dates. Folder headings have no counts.
 
@@ -77,3 +77,7 @@ Label definitions, matching rules and unfinished cleanup choices have a separate
 ## Fifty approved stickers · 0.1.10
 
 Adds the full approved 1–50 collection in the simpler app style. Each is an independent transparent PNG, available in event details, custom label defaults and per-pattern calendar tidy-up rules. The same keys are accepted in backup validation and AI cleanup suggestions. Existing assets and saved assignments keep their original identifiers. Android bundles display-sized copies for offline use.
+
+## Calendar swipe direction · 0.1.11
+
+Swipe left to advance and right to return in month and week views. Vertical scrolling, pinch zoom and panning while zoomed retain their existing behaviour.
