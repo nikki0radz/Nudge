@@ -81,3 +81,12 @@ Adds the full approved 1–50 collection in the simpler app style. Each is an in
 ## Calendar swipe direction · 0.1.11
 
 Swipe left to advance and right to return in month and week views. Vertical scrolling, pinch zoom and panning while zoomed retain their existing behaviour.
+
+
+## Cream sticky notes and continuing reminders · 0.1.12
+
+Settings → Notifications → Enable sticky notes opens Android's Display over other apps permission screen. The selected cream note with pink tape, stationery artwork and Done, Snooze and Edit date actions is drawn with a native application overlay. Close dismisses only the card. Try sticky note uses temporary sample content without adding a reminder. The floating note clears after 90 seconds or on opening Nudge; it does not appear on the locked screen. Standard notifications remain available if overlays are disabled or unavailable. Android may hide overlays in protected apps, and phone battery/permission settings still affect delivery.
+
+Every native delivery now persists and arms the next check-in before posting an alert. Overdue reminders continue until completed, deleted or rescheduled. Existing cadence remains 18 hours for balanced or 36 hours for gentle, moved into the configured reminder hours. A future deadline still gets a check-in beforehand. Done cancels its alarm; deleting/editing removes the old notification and replaces or cancels its alarm. Background repeat actions reconcile on resume without overwriting a newer manual date edit. Sample reminders are excluded. Browser reminders also repeat while the page is open without duplicating native alerts.
+
+Validation: `TZ=Europe/London node --test tests/*.test.cjs tests/*.test.mjs`, plus compile/run `tests/ReminderScheduleTest.java` with `android/src/com/nicole/nudge/ReminderSchedule.java`. Native delivery after dismissal/reboot and overlay appearance need phone testing. Package, storage origin, backup prefix and signing identity are preserved.

@@ -1,1 +1,1 @@
-{"versionCode": 12, "versionName": "0.1.11", "url": "https://nikki0radz.github.io/Nudge/downloads/nudge-0.1.11.apk", "notes": "Corrected calendar swipes: swipe left to go forward and right to go back, in both month and week views."}
+{"versionCode": 13, "versionName": "0.1.12", "minimumNativeVersion": 13, "url": "https://nikki0radz.github.io/Nudge/downloads/nudge-0.1.12.apk", "notes": "Cream sticky-note reminders over other apps. Unfinished reminders keep returning after their deadline; dismissal no longer stops them. Enable sticky notes in Settings → Notifications."}
