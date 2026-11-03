@@ -34,7 +34,7 @@ function parse(text,settings={},now=Date.now()){
 function tokens(s){return s.toLowerCase().replace(/diary app/g,'diary').replace(/\b(?:remind|remember|please|me|to|the|my|a|an|do|work|on|next|week|before|this|update|finish|updating)\b/g,' ').match(/[a-z0-9]+/g)||[];}
 function duplicate(a,b){const x=new Set(tokens(a)),y=new Set(tokens(b));if(!x.size||!y.size)return a.toLowerCase().trim()===b.toLowerCase().trim();const intersection=[...x].filter(t=>y.has(t)).length;return intersection/Math.max(x.size,y.size)>=.75;}
 function constrain(task,settings={},reference=Date.now(),now=Date.now()){
- const inferred=constraints.extractDeadline(task.original||'',reference);
+ const inferred=task.manualTiming?null:constraints.extractDeadline(task.original||'',reference);
  const deadline=inferred!==null?inferred:Number.isFinite(task.deadline)?task.deadline:null;
  const candidate=Number.isFinite(task.next)?task.next:choose(task.title||'',settings,now);
  let next=constraints.schedule(candidate,deadline,settings,now);if(Number.isFinite(task.notBefore)&&next<task.notBefore)next=windowTime(task.notBefore,settings);

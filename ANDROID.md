@@ -81,3 +81,10 @@ Adds the full approved 1–50 collection in the simpler app style. Each is an in
 ## Calendar swipe direction · 0.1.11
 
 Swipe left to advance and right to return in month and week views. Vertical scrolling, pinch zoom and panning while zoomed retain their existing behaviour.
+
+
+## Unreleased: continuing reminders
+
+An unfinished reminder keeps returning after its deadline, at the existing balanced/gentle pace (18/36 hours, adjusted to reminder hours). Each delivery persists and arms the next check-in before posting; dismissing an alert does not complete it. Done cancels the alarm, deletion cancels its alarm and notification, and date/time edits replace the previous schedule. Background updates reconcile on resume without overwriting newer manual edits. Examples are excluded, and the browser does not duplicate native notifications. Test with `TZ=Europe/London node --test tests/*.test.cjs tests/*.test.mjs` and the native `ReminderScheduleTest.java` cadence checks. Notification delivery and reboot need phone testing.
+
+Nicole selected cream sticky note option 1 for the future floating reminder design. That feature, its permission, and the proposed APK release are not included in this source-only fix.
