@@ -26,7 +26,7 @@ public class NudgeAlarmReceiver extends BroadcastReceiver {
  if(task.optBoolean("backlog")&&task.optLong("deadline")==0)return now+7L*86400000;
  JSONObject s=state.optJSONObject("settings");return ReminderSchedule.next(System.currentTimeMillis(),task.optLong("deadline"),s==null?"09:00":s.optString("start","09:00"),s==null?"20:00":s.optString("end","20:00"),s==null?"balanced":s.optString("pace","balanced"));}
  static void queue(JSONArray actions,String id,String type,long previous,long next)throws Exception{
-  int snoozes="snooze".equals(type)?1:0;for(int i=actions.length()-1;i>=0;i--)if(id.equals(actions.getJSONObject(i).optString("id"))){snoozes+=actions.getJSONObject(i).optInt("snoozeCount");previous=actions.getJSONObject(i).optLong("previousNext",previous);actions.remove(i);}
+  int snoozes=("snooze".equals(type)||"dismiss".equals(type))?1:0;for(int i=actions.length()-1;i>=0;i--)if(id.equals(actions.getJSONObject(i).optString("id"))){snoozes+=actions.getJSONObject(i).optInt("snoozeCount");previous=actions.getJSONObject(i).optLong("previousNext",previous);actions.remove(i);}
   actions.put(new JSONObject().put("id",id).put("type",type).put("snoozeCount",snoozes).put("previousNext",previous).put("next",next));
  }
  @Override public void onReceive(Context c,Intent intent){
@@ -34,9 +34,12 @@ public class NudgeAlarmReceiver extends BroadcastReceiver {
   try{
    JSONObject state=new JSONObject(prefs.getString("reminders","{\"tasks\":[]}"));JSONArray tasks=state.optJSONArray("tasks"),actions=new JSONArray(prefs.getString("actions","[]"));JSONObject task=null;int index=-1;
    for(int i=0;tasks!=null&&i<tasks.length();i++)if(id.equals(tasks.getJSONObject(i).optString("id"))){task=tasks.getJSONObject(i);index=i;break;}if(task==null)return;
-   if(!"fire".equals(action)&&!"snooze".equals(action))return;
+   if(!"fire".equals(action)&&!"snooze".equals(action)&&!"dismiss".equals(action))return;
    long previous=task.optLong("next");if("fire".equals(action)&&previous>System.currentTimeMillis()+5000)return;
-   task.put("next","snooze".equals(action)?System.currentTimeMillis()+3600000L:next(state,task));queue(actions,id,"snooze".equals(action)?"snooze":"reschedule",previous,task.getLong("next"));
+   if(!"fire".equals(action))task.put("snoozes",task.optInt("snoozes")+1);
+   // Delivery already armed its calendar-aware follow-up. Dismiss keeps that slot.
+   long nextTime="dismiss".equals(action)&&previous>System.currentTimeMillis()?previous:"snooze".equals(action)?System.currentTimeMillis()+3600000L:next(state,task);
+   task.put("next",nextTime);queue(actions,id,"fire".equals(action)?"reschedule":action,previous,nextTime);
    // Arm the next check-in before posting. Swiping or opening the notification cannot stop it.
    if(!prefs.edit().putString("actions",actions.toString()).putString("reminders",state.toString()).commit())throw new IllegalStateException("Could not save reminder schedule");
    if(!"done".equals(action))scheduleOne(c,task);

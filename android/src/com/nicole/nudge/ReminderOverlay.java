@@ -3,6 +3,8 @@ package com.nicole.nudge;
 import android.app.KeyguardManager;
 import android.content.*;
 import android.graphics.PixelFormat;
+import android.graphics.BitmapFactory;
+import java.io.InputStream;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.*;
@@ -37,13 +39,25 @@ final class ReminderOverlay {
   hideAll();final String id=task.optString("id");final boolean demo=task.optBoolean("demo");
   FrameLayout shell=new FrameLayout(c);shell.setPadding(dp(c,4),dp(c,10),dp(c,4),dp(c,6));
   LinearLayout note=new LinearLayout(c);note.setOrientation(1);note.setPadding(dp(c,16),dp(c,12),dp(c,16),dp(c,16));note.setBackground(paper(0xfffff6df,0xffd8acb3,22,c));note.setElevation(dp(c,4));FrameLayout.LayoutParams noteLp=new FrameLayout.LayoutParams(-1,-2);noteLp.topMargin=dp(c,8);shell.addView(note,noteLp);
-  LinearLayout head=new LinearLayout(c);head.setGravity(Gravity.CENTER_VERTICAL);TextView brand=text(c,"Nudge",15,true);head.addView(brand,new LinearLayout.LayoutParams(0,-2,1));TextView close=text(c,"×",26,false);close.setGravity(Gravity.CENTER);close.setContentDescription("Dismiss reminder; keep it active");close.setOnClickListener(v->hideAll());head.addView(close,new LinearLayout.LayoutParams(dp(c,44),dp(c,44)));note.addView(head);
-  LinearLayout body=new LinearLayout(c);body.setGravity(Gravity.CENTER_VERTICAL);TextView title=text(c,task.optString("title"),19,true);title.setMaxLines(4);title.setEllipsize(android.text.TextUtils.TruncateAt.END);body.addView(title,new LinearLayout.LayoutParams(0,-2,1));ImageView art=new ImageView(c);art.setImageResource(R.drawable.nudge_logo_foreground);art.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);body.addView(art,new LinearLayout.LayoutParams(dp(c,54),dp(c,54)));note.addView(body);
-  long deadline=task.optLong("deadline");boolean overdue=deadline>0&&deadline<=System.currentTimeMillis();long when=deadline>0?deadline:alertAt;
-  TextView due=text(c,(overdue?"Overdue · ":deadline>0?"Due · ":"A little nudge · ")+DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT).format(new Date(when)),12,false);due.setPadding(0,dp(c,8),0,dp(c,12));note.addView(due);
-  LinearLayout actions=new LinearLayout(c);button(c,actions,"Remind me in 1 hour",0xfff5ced6,()->action(c,id,"snooze",demo));button(c,actions,"Pick a custom time",0xffdfd0ed,()->edit(c,id,demo));note.addView(actions);
-  View tape=new View(c);tape.setRotation(-4);tape.setBackground(paper(0xffefb9ca,0,2,c));FrameLayout.LayoutParams tapeLp=new FrameLayout.LayoutParams(dp(c,72),dp(c,19),Gravity.TOP|Gravity.CENTER_HORIZONTAL);shell.addView(tape,tapeLp);tape.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-  WindowManager wm=(WindowManager)c.getSystemService(Context.WINDOW_SERVICE);int width=Math.min(dp(c,420),c.getResources().getDisplayMetrics().widthPixels-dp(c,24));WindowManager.LayoutParams lp=new WindowManager.LayoutParams(width,-2,WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,PixelFormat.TRANSLUCENT);lp.gravity=Gravity.TOP|Gravity.CENTER_HORIZONTAL;lp.y=dp(c,42);
+  long deadline=task.optLong("deadline"),now=System.currentTimeMillis();
+  boolean overdue=deadline>0&&deadline<=now;
+  int level=overdue?(int)Math.min(4,Math.max(task.optInt("snoozes"),(now-deadline)/86400000L)):0;
+  String[] moods={"stern","side-eye","steam","facepalm","explode"};
+  String[] remarks={"It’s still on my clipboard.","Hello from later.","My feathers are beginning to twitch.","I’ve started keeping minutes.","I have run out of feathers to ruffle."};
+  TextView brand=text(c,overdue?"Office of unfinished business":"A little nudge from Olive",13,true);note.addView(brand);
+  TextView title=text(c,task.optString("title"),27,true);title.setMaxLines(5);title.setEllipsize(android.text.TextUtils.TruncateAt.END);title.setGravity(Gravity.CENTER);title.setPadding(0,dp(c,10),0,dp(c,8));note.addView(title);
+  LinearLayout aside=new LinearLayout(c);aside.setGravity(Gravity.CENTER);
+  ImageView art=new ImageView(c);
+  try(InputStream stream=c.getAssets().open("www/assets/stickers/olive-"+(overdue?moods[level]:"wave")+".png")){art.setImageBitmap(BitmapFactory.decodeStream(stream));}catch(Exception ignored){art.setImageResource(R.drawable.nudge_logo_foreground);}
+  aside.addView(art,new LinearLayout.LayoutParams(dp(c,60),dp(c,60)));
+  TextView line=text(c,overdue?remarks[level]:"Just tapping you on the shoulder.",14,false);line.setMaxWidth(dp(c,180));aside.addView(line);note.addView(aside);
+  if(deadline>0){TextView due=text(c,(overdue?"Overdue · ":"Due · ")+DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT).format(new Date(deadline)),13,false);due.setGravity(Gravity.CENTER);note.addView(due);}
+  LinearLayout actions=new LinearLayout(c);actions.setPadding(0,dp(c,10),0,0);button(c,actions,"In 1 hour",0xfff5ced6,()->action(c,id,"snooze",demo));button(c,actions,"Custom time",0xffdfd0ed,()->edit(c,id,demo));note.addView(actions);
+  TextView close=text(c,"Dismiss · let Olive choose",14,false);close.setGravity(Gravity.CENTER);close.setMinHeight(dp(c,44));close.setOnClickListener(v->action(c,id,"dismiss",demo));note.addView(close);
+  WindowManager wm=(WindowManager)c.getSystemService(Context.WINDOW_SERVICE);int width=Math.min(dp(c,420),c.getResources().getDisplayMetrics().widthPixels-dp(c,24));
+  WindowManager.LayoutParams lp=new WindowManager.LayoutParams(width,-2,WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_DIM_BEHIND,PixelFormat.TRANSLUCENT);
+  lp.gravity=Gravity.CENTER;lp.dimAmount=.32f;
+  if(Build.VERSION.SDK_INT>=31&&wm.isCrossWindowBlurEnabled()){lp.flags|=WindowManager.LayoutParams.FLAG_BLUR_BEHIND;lp.setBlurBehindRadius(dp(c,14));}
   try{wm.addView(shell,lp);current=shell;currentId=id;manager=wm;handler.postDelayed(timeout,90000);}catch(Exception e){android.util.Log.w("Nudge","Floating note unavailable; notification remains",e);}
  }
 }
