@@ -22,20 +22,21 @@ public class NudgeAlarmReceiver extends BroadcastReceiver {
   data.put("tasks",tasks);if(!prefs.edit().putString("reminders",data.toString()).commit())throw new IllegalStateException("Could not save reminders");
   for(int i=0;i<tasks.length();i++)scheduleOne(c,tasks.getJSONObject(i));
  }
- static long next(JSONObject state,JSONObject task){JSONObject s=state.optJSONObject("settings");return ReminderSchedule.next(System.currentTimeMillis(),task.optLong("deadline"),s==null?"09:00":s.optString("start","09:00"),s==null?"20:00":s.optString("end","20:00"),s==null?"balanced":s.optString("pace","balanced"));}
+ static long next(JSONObject state,JSONObject task){long now=System.currentTimeMillis();JSONArray plan=task.optJSONArray("followups");for(int i=0;plan!=null&&i<plan.length();i++)if(plan.optLong(i)>now+60000)return plan.optLong(i);
+ if(task.optBoolean("backlog")&&task.optLong("deadline")==0)return now+7L*86400000;
+ JSONObject s=state.optJSONObject("settings");return ReminderSchedule.next(System.currentTimeMillis(),task.optLong("deadline"),s==null?"09:00":s.optString("start","09:00"),s==null?"20:00":s.optString("end","20:00"),s==null?"balanced":s.optString("pace","balanced"));}
  static void queue(JSONArray actions,String id,String type,long previous,long next)throws Exception{
-  for(int i=actions.length()-1;i>=0;i--)if(id.equals(actions.getJSONObject(i).optString("id"))){previous=actions.getJSONObject(i).optLong("previousNext",previous);actions.remove(i);}
-  actions.put(new JSONObject().put("id",id).put("type",type).put("previousNext",previous).put("next",next));
+  int snoozes="snooze".equals(type)?1:0;for(int i=actions.length()-1;i>=0;i--)if(id.equals(actions.getJSONObject(i).optString("id"))){snoozes+=actions.getJSONObject(i).optInt("snoozeCount");previous=actions.getJSONObject(i).optLong("previousNext",previous);actions.remove(i);}
+  actions.put(new JSONObject().put("id",id).put("type",type).put("snoozeCount",snoozes).put("previousNext",previous).put("next",next));
  }
  @Override public void onReceive(Context c,Intent intent){
   String id=intent.getStringExtra("id"),action=intent.getAction();if(id==null)return;NotificationManager manager=(NotificationManager)c.getSystemService(Context.NOTIFICATION_SERVICE);SharedPreferences prefs=c.getSharedPreferences("nudge",0);
   try{
    JSONObject state=new JSONObject(prefs.getString("reminders","{\"tasks\":[]}"));JSONArray tasks=state.optJSONArray("tasks"),actions=new JSONArray(prefs.getString("actions","[]"));JSONObject task=null;int index=-1;
    for(int i=0;tasks!=null&&i<tasks.length();i++)if(id.equals(tasks.getJSONObject(i).optString("id"))){task=tasks.getJSONObject(i);index=i;break;}if(task==null)return;
-   if(!"fire".equals(action)&&!"done".equals(action)&&!"snooze".equals(action))return;
+   if(!"fire".equals(action)&&!"snooze".equals(action))return;
    long previous=task.optLong("next");if("fire".equals(action)&&previous>System.currentTimeMillis()+5000)return;
-   if("done".equals(action)){tasks.remove(index);((AlarmManager)c.getSystemService(Context.ALARM_SERVICE)).cancel(alarmIntent(c,task));queue(actions,id,"done",previous,0);}
-   else{task.put("next",next(state,task));queue(actions,id,"snooze".equals(action)?"snooze":"reschedule",previous,task.getLong("next"));}
+   task.put("next","snooze".equals(action)?System.currentTimeMillis()+3600000L:next(state,task));queue(actions,id,"snooze".equals(action)?"snooze":"reschedule",previous,task.getLong("next"));
    // Arm the next check-in before posting. Swiping or opening the notification cannot stop it.
    if(!prefs.edit().putString("actions",actions.toString()).putString("reminders",state.toString()).commit())throw new IllegalStateException("Could not save reminder schedule");
    if(!"done".equals(action))scheduleOne(c,task);
@@ -45,8 +46,8 @@ public class NudgeAlarmReceiver extends BroadcastReceiver {
    Intent done=new Intent(c,NudgeAlarmReceiver.class).setAction("done").putExtra("id",id),snooze=new Intent(c,NudgeAlarmReceiver.class).setAction("snooze").putExtra("id",id);
    boolean overdue=task.optLong("deadline")>0&&task.optLong("deadline")<=System.currentTimeMillis();
    Notification notification=new Notification.Builder(c,"nudges").setSmallIcon(R.drawable.ic_nudge).setContentTitle(overdue?"Still on your list":"A little nudge").setContentText(task.optString("title")).setStyle(new Notification.BigTextStyle().bigText(task.optString("title"))).setContentIntent(open).setAutoCancel(true)
-    .addAction(new Notification.Action.Builder(null,"Done",PendingIntent.getBroadcast(c,(id+"done").hashCode(),done,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE)).build())
-    .addAction(new Notification.Action.Builder(null,"Remind me again",PendingIntent.getBroadcast(c,(id+"snooze").hashCode(),snooze,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE)).build()).build();
+    .addAction(new Notification.Action.Builder(null,"Remind me in 1 hour",PendingIntent.getBroadcast(c,(id+"snooze").hashCode(),snooze,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE)).build())
+    .addAction(new Notification.Action.Builder(null,"Pick a custom time",PendingIntent.getActivity(c,(id+"custom").hashCode(),new Intent(c,MainActivity.class).putExtra("customTaskId",id),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE)).build()).build();
    try{manager.notify(id.hashCode(),notification);}catch(SecurityException denied){android.util.Log.w("Nudge","Notification permission unavailable");}
    ReminderOverlay.show(c,task,previous);
   }catch(Exception e){android.util.Log.e("Nudge","Reminder delivery failed",e);}

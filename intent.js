@@ -9,5 +9,13 @@ function giftIntent(text,people=[]){if(typeof text!=='string'||/[?？]\s*$/.test
  return {personId:person?.id||null,name:person?.name||name,birthdayDay:null,birthdayMonth:null,birthdayYear:null,setPhoto:false,imageIndexes:[],entries:[{id:null,type:'gift',title:'',value,url:null,imageIndexes:[]}]};
 }
 function ensureGiftUpdate(text,people,updates){const gift=giftIntent(text,people);if(!gift)return updates;const out=structuredClone(updates);const person=out.find(u=>key(u.name)===key(gift.name)||gift.personId&&u.personId===gift.personId);if(!person)return [...out,gift];const entry=person.entries.find(e=>key(e.value).replace(/^a[n]?\s+/,'')===key(gift.entries[0].value).replace(/^a[n]?\s+/,''));if(entry)entry.type='gift';else person.entries.push(gift.entries[0]);return out;}
-const api={giftIntent,ensureGiftUpdate};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgeIntent=api;
+function listLikes(text,people){
+ const m=text.trim().match(/^(?:please\s+)?add\s+(.+?)\s+to\s+(?:the\s+)?things\s+(.+?)\s+likes[.!]?$/i);
+ if(!m||/\b(?:remind|then|also add)\b/i.test(m[1]))return null;
+ const matches=people.filter(p=>[p.name,...(p.aliases||[])].some(n=>key(n)===key(m[2])));
+ if(matches.length!==1)return null;
+ const p=matches[0],values=m[1].split(/\s*,\s*|\s+and\s+/i).map(x=>x.trim()).filter(Boolean);
+ return {personId:p.id,name:p.name,entries:values.filter(v=>!(p.entries||[]).some(e=>e.type==='like'&&key(e.value)===key(v))).map(value=>({type:'like',title:'',value,id:null,url:null,imageIndexes:[]})),imageIndexes:[]};
+}
+const api={giftIntent,ensureGiftUpdate,listLikes};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgeIntent=api;
 })(typeof window!=='undefined'?window:globalThis);
