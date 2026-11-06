@@ -7,6 +7,7 @@ function calendarBusy(){return [...(state.events||[]),...(state.deviceEvents||[]
 function taskPlan(t,later=false){return NudgePlanner.plan(t,state.settings,calendarBusy(),Date.now(),later)}
 function rankTasks(tasks){return tasks.map(t=>({t,p:taskPlan(t)})).sort((a,b)=>b.p.score-a.p.score||a.t.next-b.t.next).map(x=>x.t)}
 function prepareReminder(t,text){
+ t=Object.assign(t,NudgeEngine.constrain(t,state.settings,t.created||Date.now()));
  t.backlog=!!t.backlog||captureMode===2||/\b(?:in (?:my|the) backlog|someday)\b/i.test(text);
  if(!t.manualTiming&&!t.deadline&&/\b(?:before|by) christmas\b/i.test(t.original||text)){
   const ref=new Date(t.created||Date.now()),d=new Date(ref.getFullYear(),11,25);
@@ -14,6 +15,7 @@ function prepareReminder(t,text){
  }
  const fixed=t.explicitAlert||(!t.deadline&&t.timing==='spoken'&&!t.backlog)||/\bremind me (?:at|in \d+ (?:minute|hour))/i.test(t.original||'');
  if(!t.manualTiming&&!fixed&&!t.occasion?.birthdaySignature&&t.occasion?.type!=='birthday')t.next=taskPlan(t).next;
+ t.planVersion=2;
  if(t.backlog)t.tags=[...new Set([...(t.tags||[]),'Backlog'])];
  return t;
 }
@@ -37,7 +39,7 @@ function customNudge(id){
  const content=document.querySelector('#detail-content');content.innerHTML=`<h2>Pick a custom time</h2><p>${esc(t.title)}</p><form><label>Next nudge<input required type="datetime-local" value="${dateInput(Date.now()+3600000)}"></label><div class="dialog-actions"><button type="button" class="secondary" data-action="cancel-custom">Back</button><button class="primary">Set reminder</button></div></form>`;
  if(!detail.open)detail.showModal();content.querySelector('form').onsubmit=e=>{e.preventDefault();const input=content.querySelector('input'),next=Date.parse(input.value);if(!(next>Date.now())){input.setCustomValidity('Choose a future time.');input.reportValidity();input.setCustomValidity('');return}exactSnooze(t,next)};
 }
-function exactSnooze(t,next){if(!t)return;const old={...t};t.next=next;t.snoozes=(t.snoozes||0)+1;t.snoozedUntil=next;delete t.notified;if(!save()){Object.assign(t,old);return}detail.close();if(overdueQueue[0]===t.id)overdueQueue.shift();render();showNextOverdue()}
+function exactSnooze(t,next){if(!t)return;const old={...t};t.next=next;t.snoozes=(t.snoozes||0)+1;t.snoozedUntil=next;t.snoozeMode='exact';delete t.notified;if(!save()){Object.assign(t,old);return}detail.close();if(overdueQueue[0]===t.id)overdueQueue.shift();render();showNextOverdue()}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;
  switch(b.dataset.action){
  case 'capture-mode':if(!recording&&!processing&&!voiceStarting){captureMode=Number(b.dataset.mode);render()}break;
@@ -57,9 +59,21 @@ function nativePlan(t){
 function refreshPlan(){
  let changed=false;const events=calendarBusy(),now=Date.now();
  for(const t of state.tasks){
-  if(t.done||t.demo||t.manualTiming||t.snoozedUntil>now)continue;
-  const christmas=/\b(?:before|by) christmas\b/i.test(t.original||'');
-  if(!t.planVersion){if(christmas)prepareReminder(t,t.original||'');t.planVersion=1;changed=true}
+  if(t.done||t.demo)continue;
+  // Migrate once using the original capture date. Never roll 'next week' forward on each launch.
+  if((t.planVersion||0)<2){
+   if(!t.manualTiming&&!(t.snoozedUntil>now&&t.snoozeMode!=='automatic')){
+    Object.assign(t,NudgeEngine.constrain(t,state.settings,t.created||now,now));
+    const range=t.timingWindow;
+    if(range&&range.end>now)t.next=NudgeTiming.inWindow(t.next,range,state.settings,now,undefined,t.original||t.title);
+    else if((t.deadline&&t.deadline<=now)||(!t.explicitAlert&&t.timing!=='spoken'))t.next=NudgePlanner.plan(t,state.settings,events,now).next;
+    delete t.notified;delete t.dismissPlan;
+    // Only known automatic snoozes are repaired; legacy/custom choices are preserved.
+    if(t.snoozedUntil)t.snoozedUntil=t.next;
+   }
+   t.planVersion=2;changed=true;
+  }
+  if(t.manualTiming||t.snoozedUntil>now)continue;
   if(t.deadline>now&&!t.explicitAlert&&NudgePlanner.info(t).high&&t.next>now){
    const slot=NudgePlanner.plan(t,state.settings,events,now);
    if(slot.reason&&Math.abs(slot.next-t.next)>30*60000){t.next=slot.next;changed=true}
@@ -70,7 +84,8 @@ function refreshPlan(){
 async function reconsider(t,now=Date.now()){
  const events=calendarBusy(),base=NudgePlanner.plan(t,state.settings,events,now,true);
  if(!NudgeAI.token()||t.backlog)return base;
- const horizon=t.deadline>now?Math.min(t.deadline,base.next+4*86400000):base.next+3*86400000;
+ const overdue=t.deadline&&t.deadline<=now;
+ const horizon=Math.min(t.deadline>now?t.deadline:Infinity,base.next+(overdue?2*3600000:86400000),t.timingWindow?.end>now?t.timingWindow.end:Infinity);
  const duration=NudgePlanner.info(t).minutes*60000;
  const gaps=NudgePlanner.slots(base.next,horizon,state.settings,events,duration);
  const choices=[...new Set(gaps.flatMap(g=>[g.start,...(g.end-g.start>=duration+2*3600000?[g.start+2*3600000]:[])]))].slice(0,8);

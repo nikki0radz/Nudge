@@ -1,6 +1,7 @@
 /* Dates stay on device. A suggested work slot is separate from the actual deadline. */
 (function(root){
 const day=86400000, minute=60000;
+const timing=typeof module!=='undefined'&&module.exports?require('./timing.js'):root.NudgeTiming;
 const patterns=[
  ['Study',/\b(tma|assignment|university|module|dissertation|exam)\b/i,60],
  ['Finance',/\b(expenses|invoice|tax|rent|mortgage|bill|payroll)\b/i,30],
@@ -25,18 +26,28 @@ function slots(from,to,settings,events,length){
 function plan(t,settings={},events=[],now=Date.now(),later=false){
  const {category,high,minutes}=info(t),cut=t.deadline||null,days=cut?(cut-now)/day:Infinity;
  const delayed=Math.min(5,t.snoozes||0),lead=high?7:3;
- const effectiveStart=Math.max(now+minute,t.notBefore||0);
+ const range=t.manualTiming?null:t.timingWindow||timing.windowFor(t.original,t.created||now);
+ const effectiveStart=Math.max(now+minute,t.notBefore||0,range&&range.end>now?range.start:0);
+ const late=!!cut&&cut<=now;
  const near=cut&&days>0&&days<=7;
  let earliest=effectiveStart;
  if(days>lead&&cut)earliest=Math.max(earliest,cut-(high?7:Math.max(5,Math.min(14,Math.ceil(days/4))))*day);
- else if(!cut||days<=0)earliest=Math.max(earliest,now+(t.backlog?(7+delayed*2)*day:later?(high?2*60:24*60*(1+delayed))*minute:high?60*minute:2*day));
+ else if(late)earliest=Math.max(earliest,now+(later?2*60:15)*minute);
+ else if(!cut)earliest=Math.max(earliest,now+(t.backlog?7*day:later?(settings.pace==='gentle'?36:18)*60*minute:high?60*minute:4*60*minute));
  if(later&&cut&&days>0)earliest=Math.max(earliest,now+Math.min(high?60*minute:day,Math.max(minute,(cut-now)/4)));
- const until=cut&&cut>now?cut:earliest+7*day;
+ if(range&&range.end>now&&earliest>=range.end)earliest=Math.max(effectiveStart,range.end-minute);
+ const until=Math.min(cut&&cut>now?cut:earliest+7*day,range&&range.end>now?range.end:Infinity);
  const fits=slots(earliest,Math.min(until,earliest+14*day),settings,events,minutes*minute);
- const first=fits[0];let next=first?.start||Math.max(effectiveStart,clock(earliest,settings.start||'09:00'),earliest);
+ const first=fits[0];
+ const seed=timing.hash((t.id||t.title)+new Date(earliest).toDateString()+Math.floor(earliest/3600000));
+ const spread=first?Math.min(late?30*minute:3*60*minute,Math.max(0,first.end-first.start-minutes*minute)):0;
+ let next=first?first.start+(seed%Math.max(1,Math.floor(spread/minute)))*minute:timing.inWindow(null,{start:earliest,end:earliest+2*day},settings,now,undefined,t.title);
+ // A reminder is a prompt, not a full work session. Busy calendars must not hide overdue work for a week.
+ if(late){const prompt=timing.inWindow(null,{start:earliest,end:earliest+day},settings,now,undefined,t.title);next=Math.min(next,prompt);}
+ if(range&&range.end>now)next=timing.inWindow(next,range,settings,now,undefined,t.original||t.title);
  if(cut&&cut>now)next=Math.max(effectiveStart,Math.min(next,cut-1));
  const dayDelta=cut?Math.round((clock(cut,'12:00')-clock(now,'12:00'))/day):null;
- const late=!!cut&&cut<=now,scarce=near&&fits.length<=2;
+ const scarce=near&&fits.length<=2;
  const urgent=!t.backlog&&(!t.notBefore||t.notBefore<=now)&&(late||(near&&(days<=1.5||high&&(days<=3||scarce)))||(!cut&&t.next<=now));
  const score=urgent?(high?100:0)+(late?45:28)+(scarce?12:0)+Math.min(9,delayed)+Math.min(14,Math.max(0,-days)):0;
  const label=late?(dayDelta<0?Math.abs(dayDelta)+'d overdue':'Overdue today'):dayDelta===0?'Due today':dayDelta===1?'Due tomorrow':dayDelta!==null?'Due in '+dayDelta+' days':t.backlog?'Backlog':'Next nudge '+new Date(t.next||next).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
