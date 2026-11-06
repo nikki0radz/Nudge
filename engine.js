@@ -6,12 +6,13 @@ function hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h;
 function windowTime(date,settings){const d=new Date(date);const [sh,sm]=(settings.start||'09:00').split(':').map(Number);const [eh,em]=(settings.end||'20:00').split(':').map(Number);const start=sh*60+sm,end=eh*60+em,now=d.getHours()*60+d.getMinutes();if(now<start)d.setHours(sh,sm,0,0);else if(now>=end){d.setDate(d.getDate()+1);d.setHours(sh,sm,0,0);}return d.getTime();}
 function choose(text,settings={},now=Date.now()){const h=hash(text+now);return windowTime(now+(settings.pace==='gentle'?36:18)*3600000+(h%300)*60000,settings);}
 function parseDate(text,settings={},now=Date.now()){
- const lower=text.toLowerCase();let d=new Date(now),explicit=false,deadline=false,matched='';
+ const lower=text.toLowerCase(),range=constraints.windowFor(text,now);let d=new Date(now),explicit=false,deadline=false,matched='';
  const iso=lower.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/);const relative=lower.match(/\bin\s+(\d+)\s+(minutes?|hours?|days?|weeks?)\b/);
  if(iso){d=new Date(+iso[1],+iso[2]-1,+iso[3],10);matched=iso[0];explicit=true;}
  else if(relative){const unit=relative[2];d=new Date(now+Number(relative[1])*(unit.startsWith('minute')?60000:unit.startsWith('hour')?3600000:unit.startsWith('week')?7*DAY:DAY));matched=relative[0];explicit=true;}
  else if(/\btomorrow\b/.test(lower)){d.setDate(d.getDate()+1);d.setHours(10,0,0,0);matched='tomorrow';explicit=true;}
- else if(/\bnext week\b/.test(lower)){d.setDate(d.getDate()+7);d.setHours(10,0,0,0);matched='next week';explicit=true;}
+ else if(range?.kind==='next-week'){d=new Date(constraints.inWindow(null,range,settings,now,undefined,text));matched='next week';explicit=true;}
+ else if(range){d=new Date(constraints.inWindow(null,range,settings,now,undefined,text));matched='Christmas';explicit=true;}
  else if(/\btonight\b/.test(lower)){d.setHours(19,0,0,0);matched='tonight';explicit=true;}
  else if(/\btoday\b/.test(lower)){d=new Date(now+2*3600000);matched='today';explicit=true;}
  else {const wd=lower.match(/\b(?:(next|this)\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);if(wd){const target=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'].indexOf(wd[2]);let diff=(target-d.getDay()+7)%7;if(!diff)diff=7;d.setDate(d.getDate()+diff);d.setHours(10,0,0,0);matched=wd[0];explicit=true;}}
@@ -22,9 +23,9 @@ function parseDate(text,settings={},now=Date.now()){
  let next=explicit?(deadline?Math.max(now+60000,d.getTime()-DAY):d.getTime()):choose(text,settings,now);
  // Fixed spoken times are respected; automatically selected times use waking hours.
  if(!time)next=windowTime(next,settings);if(next<=now)next=now+60000;
- const cutoff=constraints.extractDeadline(text,now);if(cutoff!==null){return {next:constraints.schedule(next,cutoff,settings,now),deadline:cutoff,timing:'spoken',timePhrase:matched,context:cutoff<=now?'The requested deadline has passed.':null};}
+ const cutoff=constraints.extractDeadline(text,now)??range?.deadline??null;if(cutoff!==null){return {next:constraints.schedule(next,cutoff,settings,now),deadline:cutoff,timing:'spoken',timePhrase:matched,context:cutoff<=now?'The requested deadline has passed.':null};}
  const unresolved=!explicit&&/\b(before|after|next time|when|on|at|in|every)\b|\d/.test(lower);
- return {next,deadline:deadline?due:null,timing:explicit?'spoken':unresolved?'context':'automatic',timePhrase:matched,context:unresolved?'Timing needs context · using a gentle check-in for now':null};
+ return {next,...(range?{timingWindow:range}:{}),deadline:deadline?due:null,timing:explicit?'spoken':unresolved?'context':'automatic',timePhrase:matched,context:unresolved?'Timing needs context · using a gentle check-in for now':null};
 }
 function parse(text,settings={},now=Date.now()){
  const groups=[['Shopping',/\b(buy|shop|shopping|pick up|groceries|order|monster)\b/i],['Apps & projects',/\b(app|website|github|code|diary|project|update)\b/i],['Home',/\b(clean|wash|laundry|house|tidy|repair|bin)\b/i],['Life admin',/\b(book|pay|renew|appointment|bill|call|email|cancel|bank)\b/i],['Wellbeing',/\b(therapy|exercise|pilates|walk|rest)\b/i]];
@@ -35,10 +36,12 @@ function tokens(s){return s.toLowerCase().replace(/diary app/g,'diary').replace(
 function duplicate(a,b){const x=new Set(tokens(a)),y=new Set(tokens(b));if(!x.size||!y.size)return a.toLowerCase().trim()===b.toLowerCase().trim();const intersection=[...x].filter(t=>y.has(t)).length;return intersection/Math.max(x.size,y.size)>=.75;}
 function constrain(task,settings={},reference=Date.now(),now=Date.now()){
  const inferred=task.manualTiming?null:constraints.extractDeadline(task.original||'',reference);
- const deadline=inferred!==null?inferred:Number.isFinite(task.deadline)?task.deadline:null;
+ const range=task.manualTiming?null:task.timingWindow||constraints.windowFor(task.original||'',reference);
+ const deadline=inferred!==null?inferred:Number.isFinite(task.deadline)?task.deadline:range?.deadline??null;
  const candidate=Number.isFinite(task.next)?task.next:choose(task.title||'',settings,now);
  let next=constraints.schedule(candidate,deadline,settings,now);if(Number.isFinite(task.notBefore)&&next<task.notBefore)next=windowTime(task.notBefore,settings);
- return {...task,next,deadline,...(deadline!==null?{timing:'spoken',context:deadline<=now?'The requested deadline has passed.':null}:{}),timingVersion:2};
+ if(range&&range.end>now)next=constraints.inWindow(next,range,settings,now,undefined,task.original||task.title);
+ return {...task,next,deadline,...(range?{timingWindow:range,timing:'spoken'}:{}),...(deadline!==null?{timing:'spoken',context:deadline<=now?'The requested deadline has passed.':null}:{}),timingVersion:2};
 }
 function repairDeadlines(tasks,settings={},now=Date.now()){
  let changed=false;for(const task of tasks){if(task.done||task.timingVersion>=2)continue;

@@ -22,9 +22,16 @@ public class NudgeAlarmReceiver extends BroadcastReceiver {
   data.put("tasks",tasks);if(!prefs.edit().putString("reminders",data.toString()).commit())throw new IllegalStateException("Could not save reminders");
   for(int i=0;i<tasks.length();i++)scheduleOne(c,tasks.getJSONObject(i));
  }
- static long next(JSONObject state,JSONObject task){long now=System.currentTimeMillis();JSONArray plan=task.optJSONArray("followups");for(int i=0;plan!=null&&i<plan.length();i++)if(plan.optLong(i)>now+60000)return plan.optLong(i);
- if(task.optBoolean("backlog")&&task.optLong("deadline")==0)return now+7L*86400000;
- JSONObject s=state.optJSONObject("settings");return ReminderSchedule.next(System.currentTimeMillis(),task.optLong("deadline"),s==null?"09:00":s.optString("start","09:00"),s==null?"20:00":s.optString("end","20:00"),s==null?"balanced":s.optString("pace","balanced"));}
+ static long next(JSONObject state,JSONObject task){
+  long now=System.currentTimeMillis();JSONObject s=state.optJSONObject("settings");
+  long fallback=ReminderSchedule.next(now,task.optLong("deadline"),s==null?"09:00":s.optString("start","09:00"),s==null?"20:00":s.optString("end","20:00"),s==null?"balanced":s.optString("pace","balanced"),task.optString("id"));
+  boolean overdue=task.optLong("deadline")>0&&task.optLong("deadline")<=now;
+  JSONArray plan=task.optJSONArray("followups");
+  for(int i=0;plan!=null&&i<plan.length();i++){long slot=plan.optLong(i);if(slot>now+60000&&(!overdue||slot<=fallback))return slot;}
+  if(task.optBoolean("backlog")&&task.optLong("deadline")==0)return now+7L*86400000;
+  return fallback;
+ }
+
  static void queue(JSONArray actions,String id,String type,long previous,long next)throws Exception{
   int snoozes=("snooze".equals(type)||"dismiss".equals(type))?1:0;for(int i=actions.length()-1;i>=0;i--)if(id.equals(actions.getJSONObject(i).optString("id"))){snoozes+=actions.getJSONObject(i).optInt("snoozeCount");previous=actions.getJSONObject(i).optLong("previousNext",previous);actions.remove(i);}
   actions.put(new JSONObject().put("id",id).put("type",type).put("snoozeCount",snoozes).put("previousNext",previous).put("next",next));

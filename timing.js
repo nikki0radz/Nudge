@@ -55,5 +55,56 @@ function schedule(candidate,deadline,settings={},now=Date.now(),zone){
  // An explicit imminent deadline takes priority if quiet hours leave no valid interval.
  return Math.min(latest,Math.round(best===null?Math.max(earliest,Math.min(latest,preferred)):best));
 }
-const api={extractDeadline,schedule,localParts,zonedTime};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgeTiming=api;
+// Calendar ranges are anchored to capture time, never to the day an old task is opened.
+function windowFor(text,reference=Date.now(),zone){
+ zone=zoneName(zone);const value=String(text||'').toLowerCase(),p=localParts(reference,zone);
+ const at=(day)=>zonedTime({...day,hour:0,minute:0,second:0},zone);
+ // Do not let an event mentioned later in a sentence override a separate alert request.
+ if(/\b(?:tomorrow|today|in \d+ (?:minutes?|hours?|days?|weeks?)|20\d\d-\d\d-\d\d)\b/.test(value))return null;
+ if(/\bnext week\b/.test(value)&&! /\b(?:before|after|by)\s+next week\b/.test(value)){
+  const weekday=new Date(Date.UTC(p.year,p.month-1,p.day)).getUTCDay();
+  const monday=calendarDay(p,7-((weekday+6)%7));
+  return {start:at(monday),end:at(calendarDay(monday,7)),kind:'next-week'};
+ }
+ if(/\b(?:around|at|over|for|before|by)\s+(?:this\s+|next\s+)?christmas\b/.test(value)){
+  // A separate explicit date/relative alert takes precedence over the occasion.
+  if(/\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|april|may|june|july|august|september|october|november|december)\b|\bremind me at\s+(?:\d|noon|midnight)/.test(value))return null;
+  const yearMatch=value.match(/\bchristmas\s+(20\d{2})\b/);
+  const year=yearMatch?+yearMatch[1]:p.year+(p.month===12&&p.day>25?1:0);
+  const booking=/\b(?:book|arrange|order|reserve)\b/.test(value);
+  const before=/\b(?:before|by)\s+(?:this\s+|next\s+)?christmas\b/.test(value);
+  return {start:at({year,month:12,day:booking||before?11:18}),end:at(before||booking?{year,month:12,day:25}:{year:year+1,month:1,day:1}),kind:'christmas',...(before?{deadline:at({year,month:12,day:25})}:{})};
+ }
+ return null;
+}
+function hash(value){let h=0;for(const c of String(value))h=(h*31+c.charCodeAt(0))>>>0;return h;}
+function inWindow(candidate,window,settings={},now=Date.now(),zone,text=''){
+ zone=zoneName(zone);const lower=Math.max(now+60000,window.start),upper=window.end;
+ if(lower>=upper)return candidate; // An elapsed request becomes an ordinary unfinished task.
+ const [sh,sm]=(settings.start||'09:00').split(':').map(Number),[eh,em]=(settings.end||'20:00').split(':').map(Number);
+ const value=String(text).toLowerCase().replace(/([ap])\s*\.\s*m\s*\.?/g,'$1m');
+ const clock=value.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b|\bat\s+(\d{1,2}):(\d{2})\b/);
+ const explicitHour=clock?(clock[3]?+clock[1]%12+(clock[3]==='pm'?12:0):+clock[4]):null;
+ const explicitMinute=clock?+(clock[2]||clock[5]||0):0;
+ const exact=!!window.kind&&clock&&explicitHour<24&&explicitMinute<60;
+ const weekdays=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+ const namedDay=window.kind?weekdays.findIndex(d=>new RegExp('\\b'+d+'\\b').test(value)):-1;
+ const business=!!window.kind&&namedDay<0&&/\b(?:book|call|phone|arrange)\b/i.test(text);
+ if(Number.isFinite(candidate)&&candidate>=lower&&candidate<upper){
+  const p=localParts(candidate,zone),m=p.hour*60+p.minute,wd=new Date(Date.UTC(p.year,p.month-1,p.day)).getUTCDay();
+  if((exact?m===explicitHour*60+explicitMinute:m>=sh*60+sm&&m<eh*60+em)&&(namedDay<0||wd===namedDay)&&(!business||(wd!==0&&wd!==6)))return candidate;
+ }
+ const first=localParts(lower,zone);
+ for(let i=0;i<32;i++){
+  const day=calendarDay(first,i),wd=new Date(Date.UTC(day.year,day.month-1,day.day)).getUTCDay();
+  if(namedDay>=0&&wd!==namedDay||business&&(wd===0||wd===6))continue;
+  if(exact){const value=zonedTime({...day,hour:explicitHour,minute:explicitMinute},zone);if(value>=lower&&value<upper)return value;continue;}
+  const lo=Math.max(lower,zonedTime({...day,hour:sh,minute:sm},zone)),hi=Math.min(upper,zonedTime({...day,hour:eh,minute:em},zone));
+  if(lo>=hi)continue;
+  const spread=Math.min(3*3600000,hi-lo-1);
+  return lo+Math.floor(hash(text+day.year+'-'+day.month+'-'+day.day)%(Math.max(1,Math.floor(spread/60000))))*60000;
+ }
+ return lower; // Narrow windows can legitimately have no weekday/waking-hour intersection.
+}
+const api={extractDeadline,schedule,localParts,zonedTime,windowFor,inWindow,hash};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.NudgeTiming=api;
 })(typeof window!=='undefined'?window:globalThis);
